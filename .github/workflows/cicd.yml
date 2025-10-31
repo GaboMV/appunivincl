@@ -1,4 +1,3 @@
-# Nombre del Workflow
 name: CI/CD de Flutter para Web
 
 on:
@@ -43,14 +42,15 @@ jobs:
       - name: 5. Analizar código (ignorar warnings e info)
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
-      # ⚡ Omitimos flutter test completamente
       - name: 6. Construir Flutter Web
+        # Asegúrate de que la URL base sea correcta para tu repositorio de GitHub Pages
         run: flutter build web --release --base-href /${{ github.event.repository.name }}/
 
       - name: 7. Subir artefacto de build
         uses: actions/upload-artifact@v4
         with:
-          name: github-pages-${{ github.run_id }}
+          # CORRECCIÓN: Se elimina la parte dinámica del nombre para que coincida con el job de descarga.
+          name: github-pages
           path: build/web
 
   #----------------------------------------------
@@ -72,6 +72,7 @@ jobs:
       - name: 1. Descargar artefacto
         uses: actions/download-artifact@v4
         with:
+          # Este nombre ahora coincide con el artefacto subido en el job anterior.
           name: github-pages
 
       - name: 2. Configurar Pages
