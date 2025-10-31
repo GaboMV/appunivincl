@@ -1,3 +1,4 @@
+# Nombre del Workflow
 name: CI/CD de Flutter para Web (Mejorado)
 
 on:
@@ -40,7 +41,8 @@ jobs:
         run: flutter pub get
 
       - name: 5. Verificar Formato del Código
-        run: flutter format --output=none --set-exit-if-changed .
+        # CORRECCIÓN: El comando correcto es 'dart format'
+        run: dart format --output=none --set-exit-if-changed .
 
       - name: 6. Analizar código (estrictamente)
         run: flutter analyze --fatal-infos --fatal-warnings
@@ -121,3 +123,5 @@ jobs:
       - name: 4. Desplegar
         id: deployment
         uses: actions/deploy-pages@v4
+
+
