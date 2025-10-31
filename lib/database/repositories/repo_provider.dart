@@ -11,18 +11,18 @@ part 'repo_provider.g.dart';
 
 @Riverpod(keepAlive: true)
 EstudianteRepository estudianteRepository(EstudianteRepositoryRef ref) {
-  final dbInstanceFuture = ref.watch(databaseInstanceProvider.future); 
+  final dbInstanceFuture = ref.watch(databaseInstanceProvider.future);
   return EstudianteRepository(dbInstanceFuture);
 }
 
 @Riverpod(keepAlive: true)
 MateriaRepository materiaRepository(MateriaRepositoryRef ref) {
-  final dbInstanceFuture = ref.watch(databaseInstanceProvider.future); 
+  final dbInstanceFuture = ref.watch(databaseInstanceProvider.future);
   return MateriaRepository(dbInstanceFuture);
 }
 
 @Riverpod(keepAlive: true)
 RegistroRepository registroRepository(RegistroRepositoryRef ref) {
-  final dbInstanceFuture = ref.watch(databaseInstanceProvider.future); 
+  final dbInstanceFuture = ref.watch(databaseInstanceProvider.future);
   return RegistroRepository(dbInstanceFuture);
 }

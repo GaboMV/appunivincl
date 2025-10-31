@@ -37,9 +37,12 @@ class MateriaRepository {
   }
 
   // 4. OBTENER PARALELOS OFERTADOS para una Materia en un Semestre (Necesario para inscribirse)
-  Future<List<Map<String, dynamic>>> getParalelosOfertados(int idMateria, int idSemestre) async {
+  Future<List<Map<String, dynamic>>> getParalelosOfertados(
+    int idMateria,
+    int idSemestre,
+  ) async {
     final db = await dbFuture;
-    
+
     // Consulta JOIN para obtener el paralelo, docente y aula
     final sql = '''
       SELECT 
@@ -51,7 +54,7 @@ class MateriaRepository {
       LEFT JOIN Aulas AS A ON PS.id_aula = A.id_aula 
       WHERE PS.id_materia = ? AND PS.id_semestre = ?;
     ''';
-    
+
     return await db.rawQuery(sql, [idMateria, idSemestre]);
   }
 }

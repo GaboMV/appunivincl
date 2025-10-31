@@ -1,7 +1,6 @@
 // lib/features/session/providers/session_state.dart
 import 'package:appuniv/database/models/academic_models.dart';
 
-
 class SessionState {
   final Estudiante? estudiante;
   final bool isLoggedIn;
@@ -11,10 +10,7 @@ class SessionState {
   // Estado inicial: Nadie logueado
   SessionState.initial() : this(estudiante: null, isLoggedIn: false);
 
-  SessionState copyWith({
-    Estudiante? estudiante,
-    bool? isLoggedIn,
-  }) {
+  SessionState copyWith({Estudiante? estudiante, bool? isLoggedIn}) {
     return SessionState(
       estudiante: estudiante ?? this.estudiante,
       isLoggedIn: isLoggedIn ?? this.isLoggedIn,

@@ -4,12 +4,13 @@ import 'package:appuniv/widgets/start_up_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Initialize the database
 
-void main() async{
-    WidgetsFlutterBinding.ensureInitialized();
-   // Initialize the database
- 
- runApp(const ProviderScope(child: AppAccesible()));}
+  runApp(const ProviderScope(child: AppAccesible()));
+}
+
 class AppAccesible extends StatelessWidget {
   const AppAccesible({super.key});
 

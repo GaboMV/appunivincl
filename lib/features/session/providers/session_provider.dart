@@ -14,10 +14,7 @@ class SessionNotifier extends _$SessionNotifier {
 
   // Llamado por LoginNotifier si el login es exitoso
   void setSession(Estudiante estudiante) {
-    state = state.copyWith(
-      estudiante: estudiante,
-      isLoggedIn: true,
-    );
+    state = state.copyWith(estudiante: estudiante, isLoggedIn: true);
   }
 
   void logout() {

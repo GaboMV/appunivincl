@@ -4,34 +4,39 @@ import 'package:appuniv/features/login/presentation/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:appuniv/core/tts_service.dart';
-import 'package:appuniv/features/session/providers/session_provider.dart'; 
+import 'package:appuniv/features/session/providers/session_provider.dart';
 // Asegúrate de importar tus pantallas secundarias aquí cuando las crees
 
 class MenuPrincipalAccesible extends ConsumerStatefulWidget {
   const MenuPrincipalAccesible({super.key});
 
   @override
-  ConsumerState<MenuPrincipalAccesible> createState() => _MenuPrincipalAccesibleState();
+  ConsumerState<MenuPrincipalAccesible> createState() =>
+      _MenuPrincipalAccesibleState();
 }
 
-class _MenuPrincipalAccesibleState extends ConsumerState<MenuPrincipalAccesible> {
+class _MenuPrincipalAccesibleState
+    extends ConsumerState<MenuPrincipalAccesible> {
   final tts = TtsService();
-  int _campoActual = 0; // 0: Horarios, 1: Inscripciones, 2: Historial, 3: Notificaciones
+  int _campoActual =
+      0; // 0: Horarios, 1: Inscripciones, 2: Historial, 3: Notificaciones
 
   // Nombres de los botones para la lectura de pantalla
   final List<String> _opciones = [
-    "Ver Horarios del semestre actual", 
-    "Inscripciones y Solicitudes", 
-    "Historial de Notas"
+    "Ver Horarios del semestre actual",
+    "Inscripciones y Solicitudes",
+    "Historial de Notas",
   ];
 
   @override
   void initState() {
     super.initState();
     final estudiante = ref.read(sessionNotifierProvider).estudiante;
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      tts.hablar("Menú principal. Bienvenido ${estudiante?.nombre ?? ''}. Selecciona Horarios.");
+      tts.hablar(
+        "Menú principal. Bienvenido ${estudiante?.nombre ?? ''}. Selecciona Horarios.",
+      );
     });
   }
 
@@ -91,7 +96,8 @@ class _MenuPrincipalAccesibleState extends ConsumerState<MenuPrincipalAccesible>
               style: const TextStyle(color: Colors.white, fontSize: 24),
             ),
             const Spacer(),
-            if (seleccionado) const Icon(Icons.arrow_forward_ios, color: Colors.white70),
+            if (seleccionado)
+              const Icon(Icons.arrow_forward_ios, color: Colors.white70),
           ],
         ),
       ),
@@ -99,7 +105,7 @@ class _MenuPrincipalAccesibleState extends ConsumerState<MenuPrincipalAccesible>
   }
 
   Widget _buildBotonNotificacion(BuildContext context) {
-    final int notificaciones = 3; 
+    final int notificaciones = 3;
 
     return IconButton(
       icon: Stack(
@@ -124,12 +130,19 @@ class _MenuPrincipalAccesibleState extends ConsumerState<MenuPrincipalAccesible>
       ),
       onPressed: () {
         setState(() => _campoActual = 3); // La opción 3 es la campana
-        tts.hablar("Tienes $notificaciones notificaciones nuevas. Selecciona OK para ver.");
+        tts.hablar(
+          "Tienes $notificaciones notificaciones nuevas. Selecciona OK para ver.",
+        );
       },
     );
   }
 
-  Widget _botonGrande(String texto, IconData icono, VoidCallback accion, {bool habilitado = true}) {
+  Widget _botonGrande(
+    String texto,
+    IconData icono,
+    VoidCallback accion, {
+    bool habilitado = true,
+  }) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: habilitado ? Colors.blueGrey : Colors.grey,
@@ -146,25 +159,25 @@ class _MenuPrincipalAccesibleState extends ConsumerState<MenuPrincipalAccesible>
       ),
     );
   }
-  
-  // -----------------------------------------------------------------------------------------------------
 
+  // -----------------------------------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
     final estudiante = ref.watch(sessionNotifierProvider).estudiante;
-    
+
     // Definimos el número total de opciones accesibles (3 botones + la campana)
-    const int totalOpciones = 4; 
+    const int totalOpciones = 4;
 
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text("Hola, ${estudiante?.nombre ?? 'Usuario'}", style: const TextStyle(color: Colors.white)),
+        title: Text(
+          "Hola, ${estudiante?.nombre ?? 'Usuario'}",
+          style: const TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.grey[900],
-        actions: [
-          _buildBotonNotificacion(context),
-        ],
+        actions: [_buildBotonNotificacion(context)],
       ),
       body: Column(
         children: [
@@ -187,39 +200,46 @@ class _MenuPrincipalAccesibleState extends ConsumerState<MenuPrincipalAccesible>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Expanded(child:
-            _botonGrande("Atrás", Icons.arrow_back, () {
+          Expanded(
+            child: _botonGrande("Atrás", Icons.arrow_back, () {
               setState(() {
-                _campoActual = (_campoActual - 1 + totalOpciones) % totalOpciones;
+                _campoActual =
+                    (_campoActual - 1 + totalOpciones) % totalOpciones;
               });
               _ttsCampoActual();
-            })),
-          Expanded(child:
-            _botonGrande("OK", Icons.check, () {
+            }),
+          ),
+          Expanded(
+            child: _botonGrande("OK", Icons.check, () {
               if (_campoActual == 3) {
-                 tts.hablar("Abriendo panel de notificaciones.");
-                 // Lógica para notificaciones
+                tts.hablar("Abriendo panel de notificaciones.");
+                // Lógica para notificaciones
               } else {
                 _ejecutarAccion(_campoActual);
               }
-            })),
-          Expanded(child:
-            _botonGrande("Sig", Icons.arrow_forward, () {
+            }),
+          ),
+          Expanded(
+            child: _botonGrande("Sig", Icons.arrow_forward, () {
               setState(() {
                 _campoActual = (_campoActual + 1) % totalOpciones;
               });
               _ttsCampoActual();
-            })),
-          Expanded(child:
-            _botonGrande("Salir", Icons.exit_to_app, () {
-              final sessionNotifier = ref.read(sessionNotifierProvider.notifier);
+            }),
+          ),
+          Expanded(
+            child: _botonGrande("Salir", Icons.exit_to_app, () {
+              final sessionNotifier = ref.read(
+                sessionNotifierProvider.notifier,
+              );
               tts.hablar("Cerrando sesión.");
               sessionNotifier.logout();
               // Navega de vuelta al login
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (_) => const LoginPageAccesible()),
               );
-            })),
+            }),
+          ),
         ],
       ),
     );

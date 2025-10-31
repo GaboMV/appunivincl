@@ -7,21 +7,24 @@ class EstudianteRepository {
 
   EstudianteRepository(this.dbFuture);
 
-Future<void> debugPrintAllStudents() async {
+  Future<void> debugPrintAllStudents() async {
     final db = await dbFuture;
     final List<Map<String, dynamic>> maps = await db.query('Estudiantes');
-    
+
     print('==================================================');
     print('DEBUG: Contenido de la tabla Estudiantes:');
     if (maps.isEmpty) {
       print('La tabla está vacía.');
     } else {
       for (var map in maps) {
-        print('  Usuario ID: ${map['id_estudiante']}, Usuario: ${map['usuario']}, Contraseña: ${map['contrasena']}');
+        print(
+          '  Usuario ID: ${map['id_estudiante']}, Usuario: ${map['usuario']}, Contraseña: ${map['contrasena']}',
+        );
       }
     }
     print('==================================================');
   }
+
   // 1. AUTENTICACIÓN
   Future<Estudiante?> authenticate(String usuario, String contrasena) async {
     final db = await dbFuture;
@@ -33,15 +36,19 @@ Future<void> debugPrintAllStudents() async {
 
     return maps.isNotEmpty ? Estudiante.fromMap(maps.first) : null;
   }
+
   Future<void> debugPrintAllTables(Database db) async {
-  
-  final tables = await db.query('sqlite_master', where: 'type = ?', whereArgs: ['table']);
-  
-  print('==================================================');
-  print('DEBUG: Tablas encontradas:');
-  for (var table in tables) {
-    print('  - ${table['name']}');
+    final tables = await db.query(
+      'sqlite_master',
+      where: 'type = ?',
+      whereArgs: ['table'],
+    );
+
+    print('==================================================');
+    print('DEBUG: Tablas encontradas:');
+    for (var table in tables) {
+      print('  - ${table['name']}');
+    }
+    print('==================================================');
   }
-  print('==================================================');
-}
 }

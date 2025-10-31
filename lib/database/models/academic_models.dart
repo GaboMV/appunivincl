@@ -4,11 +4,17 @@
 class Estudiante {
   final int id;
   final String usuario;
-  final String contrasena; 
+  final String contrasena;
   final String nombre;
   final String apellido;
 
-  Estudiante({required this.id, required this.usuario, required this.contrasena, required this.nombre, required this.apellido});
+  Estudiante({
+    required this.id,
+    required this.usuario,
+    required this.contrasena,
+    required this.nombre,
+    required this.apellido,
+  });
 
   factory Estudiante.fromMap(Map<String, dynamic> map) {
     return Estudiante(
@@ -21,7 +27,12 @@ class Estudiante {
   }
 
   Map<String, dynamic> toMap() {
-    return {'usuario': usuario, 'contrasena': contrasena, 'nombre': nombre, 'apellido': apellido};
+    return {
+      'usuario': usuario,
+      'contrasena': contrasena,
+      'nombre': nombre,
+      'apellido': apellido,
+    };
   }
 }
 
@@ -32,7 +43,11 @@ class Docente {
 
   Docente({required this.id, required this.nombre, required this.apellido});
   factory Docente.fromMap(Map<String, dynamic> map) {
-    return Docente(id: map['id_docente'] as int, nombre: map['nombre'] as String, apellido: map['apellido'] as String);
+    return Docente(
+      id: map['id_docente'] as int,
+      nombre: map['nombre'] as String,
+      apellido: map['apellido'] as String,
+    );
   }
 }
 
@@ -42,7 +57,10 @@ class Semestre {
 
   Semestre({required this.id, required this.nombre});
   factory Semestre.fromMap(Map<String, dynamic> map) {
-    return Semestre(id: map['id_semestre'] as int, nombre: map['nombre'] as String);
+    return Semestre(
+      id: map['id_semestre'] as int,
+      nombre: map['nombre'] as String,
+    );
   }
 }
 
@@ -52,7 +70,10 @@ class Facultad {
 
   Facultad({required this.id, required this.nombre});
   factory Facultad.fromMap(Map<String, dynamic> map) {
-    return Facultad(id: map['id_facultad'] as int, nombre: map['nombre'] as String);
+    return Facultad(
+      id: map['id_facultad'] as int,
+      nombre: map['nombre'] as String,
+    );
   }
 }
 
@@ -73,7 +94,12 @@ class Materia {
   final String nombre;
   final int idFacultad;
 
-  Materia({required this.id, required this.codigo, required this.nombre, required this.idFacultad});
+  Materia({
+    required this.id,
+    required this.codigo,
+    required this.nombre,
+    required this.idFacultad,
+  });
   factory Materia.fromMap(Map<String, dynamic> map) {
     return Materia(
       id: map['id_materia'] as int,
@@ -89,14 +115,18 @@ class ParaleloSemestre {
   final int idMateria;
   final int idDocente;
   final int idSemestre;
-  final int? idAula; 
+  final int? idAula;
   final String nombreParalelo;
 
   ParaleloSemestre({
-    required this.id, required this.idMateria, required this.idDocente, 
-    required this.idSemestre, required this.nombreParalelo, this.idAula
+    required this.id,
+    required this.idMateria,
+    required this.idDocente,
+    required this.idSemestre,
+    required this.nombreParalelo,
+    this.idAula,
   });
-  
+
   factory ParaleloSemestre.fromMap(Map<String, dynamic> map) {
     return ParaleloSemestre(
       id: map['id_paralelo'] as int,
@@ -115,7 +145,12 @@ class Horario {
   final String horaInicio;
   final String horaFin;
 
-  Horario({required this.id, required this.dia, required this.horaInicio, required this.horaFin});
+  Horario({
+    required this.id,
+    required this.dia,
+    required this.horaInicio,
+    required this.horaFin,
+  });
   factory Horario.fromMap(Map<String, dynamic> map) {
     return Horario(
       id: map['id_horario'] as int,
@@ -138,10 +173,16 @@ class Inscripcion {
   final double? segundoTurno;
 
   Inscripcion({
-    required this.id, required this.idEstudiante, required this.idParalelo, required this.estado,
-    this.parcial1, this.parcial2, this.examenFinal, this.segundoTurno,
+    required this.id,
+    required this.idEstudiante,
+    required this.idParalelo,
+    required this.estado,
+    this.parcial1,
+    this.parcial2,
+    this.examenFinal,
+    this.segundoTurno,
   });
-  
+
   factory Inscripcion.fromMap(Map<String, dynamic> map) {
     return Inscripcion(
       id: map['id_inscripcion'] as int,
@@ -161,7 +202,7 @@ class Inscripcion {
       'id_paralelo': idParalelo,
       'estado': estado,
       // Puedes incluir las notas como null al insertar, o en un método separado
-      'parcial1': parcial1, 
+      'parcial1': parcial1,
     };
   }
 }
@@ -174,10 +215,13 @@ class SolicitudInscripcion {
   final String estado; // "En Espera", "Aceptada", "Rechazada"
 
   SolicitudInscripcion({
-    required this.id, required this.idEstudiante, required this.idParalelo, 
-    required this.motivo, required this.estado
+    required this.id,
+    required this.idEstudiante,
+    required this.idParalelo,
+    required this.motivo,
+    required this.estado,
   });
-  
+
   factory SolicitudInscripcion.fromMap(Map<String, dynamic> map) {
     return SolicitudInscripcion(
       id: map['id_solicitud'] as int,

@@ -6,30 +6,39 @@ class RegistroRepository {
   final Future<Database> dbFuture;
 
   RegistroRepository(this.dbFuture);
-  
+
   // ===============================================
   // 1. REQUISITOS
   // ===============================================
 
   // Verifica si el estudiante tiene APROBADA la materia previa
-  Future<bool> _tieneMateriaAprobada(int idEstudiante, int idMateriaPrevia) async {
+  Future<bool> _tieneMateriaAprobada(
+    int idEstudiante,
+    int idMateriaPrevia,
+  ) async {
     final db = await dbFuture;
-    
+
     // Busca en las inscripciones del estudiante si ha APROBADO la materia previa
-    final List<Map<String, dynamic>> result = await db.rawQuery('''
+    final List<Map<String, dynamic>> result = await db.rawQuery(
+      '''
       SELECT I.estado
       FROM Inscripciones AS I
       JOIN Paralelos_Semestre AS PS ON I.id_paralelo = PS.id_paralelo
       WHERE I.id_estudiante = ? AND PS.id_materia = ? AND I.estado = 'Aprobada';
-    ''', [idEstudiante, idMateriaPrevia]);
+    ''',
+      [idEstudiante, idMateriaPrevia],
+    );
 
     return result.isNotEmpty;
   }
 
   // Verifica si el estudiante cumple TODOS los requisitos
-  Future<bool> cumpleRequisitosParaMateria(int idEstudiante, int idMateriaACursar) async {
+  Future<bool> cumpleRequisitosParaMateria(
+    int idEstudiante,
+    int idMateriaACursar,
+  ) async {
     final db = await dbFuture;
-    
+
     // 1. Obtener todas las materias requeridas
     final List<Map<String, dynamic>> requisitos = await db.query(
       'Requisitos',
@@ -49,7 +58,6 @@ class RegistroRepository {
     return true; // Cumple con todos
   }
 
-
   // ===============================================
   // 2. INSCRIPCIÓN Y RETIRO
   // ===============================================
@@ -63,13 +71,16 @@ class RegistroRepository {
       idParalelo: idParalelo,
       estado: 'Cursando',
     );
-    
+
     // El toMap solo incluye los campos NO nulos para la inserción inicial
     final map = inscripcion.toMap();
-    map['fecha_inscripcion'] = DateTime.now().toIso8601String(); 
+    map['fecha_inscripcion'] = DateTime.now().toIso8601String();
 
-    return await db.insert('Inscripciones', map, 
-                           conflictAlgorithm: ConflictAlgorithm.fail);
+    return await db.insert(
+      'Inscripciones',
+      map,
+      conflictAlgorithm: ConflictAlgorithm.fail,
+    );
   }
 
   // Retirar materia
@@ -87,9 +98,12 @@ class RegistroRepository {
   // 3. HORARIO (DEL SEMESTRE ACTUAL)
   // ===============================================
 
-  Future<List<Map<String, dynamic>>> getHorarioEstudiante(int idEstudiante, String nombreSemestre) async {
+  Future<List<Map<String, dynamic>>> getHorarioEstudiante(
+    int idEstudiante,
+    String nombreSemestre,
+  ) async {
     final db = await dbFuture;
-    
+
     final sql = '''
       SELECT 
           M.nombre AS materia_nombre, 
@@ -110,7 +124,7 @@ class RegistroRepository {
       WHERE I.id_estudiante = ? AND S.nombre = ? AND I.estado = 'Cursando'
       ORDER BY H.dia, H.hora_inicio;
     ''';
-    
+
     return await db.rawQuery(sql, [idEstudiante, nombreSemestre]);
   }
 
@@ -119,9 +133,12 @@ class RegistroRepository {
   // ===============================================
 
   // Obtener notas filtradas por semestre
-  Future<List<Map<String, dynamic>>> getNotasPorSemestre(int idEstudiante, String nombreSemestre) async {
+  Future<List<Map<String, dynamic>>> getNotasPorSemestre(
+    int idEstudiante,
+    String nombreSemestre,
+  ) async {
     final db = await dbFuture;
-    
+
     final sql = '''
       SELECT 
           M.nombre AS materia_nombre, 
@@ -137,7 +154,7 @@ class RegistroRepository {
       JOIN Materias AS M ON PS.id_materia = M.id_materia
       WHERE I.id_estudiante = ? AND S.nombre = ?;
     ''';
-    
+
     return await db.rawQuery(sql, [idEstudiante, nombreSemestre]);
   }
 
@@ -146,7 +163,11 @@ class RegistroRepository {
   // ===============================================
 
   // Enviar una solicitud
-  Future<int> enviarSolicitud(int idEstudiante, int idParalelo, String motivo) async {
+  Future<int> enviarSolicitud(
+    int idEstudiante,
+    int idParalelo,
+    String motivo,
+  ) async {
     final db = await dbFuture;
     final solicitud = SolicitudInscripcion(
       id: 0,
@@ -155,11 +176,14 @@ class RegistroRepository {
       motivo: motivo,
       estado: 'En Espera', // Estado inicial
     );
-    
-    final map = solicitud.toMap();
-    map['fecha_solicitud'] = DateTime.now().toIso8601String(); 
 
-    return await db.insert('Solicitudes_Inscripcion', map, 
-                           conflictAlgorithm: ConflictAlgorithm.replace);
+    final map = solicitud.toMap();
+    map['fecha_solicitud'] = DateTime.now().toIso8601String();
+
+    return await db.insert(
+      'Solicitudes_Inscripcion',
+      map,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 }
