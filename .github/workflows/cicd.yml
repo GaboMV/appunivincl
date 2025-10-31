@@ -50,7 +50,7 @@ jobs:
       - name: 7. Subir artefacto de build
         uses: actions/upload-artifact@v4
         with:
-          name: github-pages
+          name: github-pages-${{ github.run_id }}
           path: build/web
 
   #----------------------------------------------
