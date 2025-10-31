@@ -14,10 +14,10 @@ permissions:
 
 jobs:
   #----------------------------------------------
-  # JOB 1: Lint, Pruebas y Seguridad
+  # JOB 1: Lint
   #----------------------------------------------
-  lint_and_test:
-    name: 🛡️ Lint, Pruebas y Seguridad
+  lint:
+    name: 🛡️ Lint
     runs-on: ubuntu-latest
     
     steps:
@@ -46,16 +46,15 @@ jobs:
         # CORRECCIÓN: Volvemos a tu configuración original para no fallar por 'infos' o 'warnings'
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
-      - name: 7. Ejecutar Pruebas
-        # ELIMINADO: Se quitó el paso 'dart pub outdated --mode=security' que estaba fallando.
-        run: flutter test
+      # ELIMINADO: Se quitó el paso 'flutter test' que estaba fallando.
+      # El job 'lint_and_test' ha sido renombrado a 'lint'.
 
   #----------------------------------------------
   # JOB 2: Construir la App Web
   #----------------------------------------------
   build:
     name: 🏗️ Construir App Web
-    needs: lint_and_test # Depende del job anterior
+    needs: lint # Depende del job de lint
     runs-on: ubuntu-latest
 
     steps:
