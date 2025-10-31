@@ -16,38 +16,40 @@ jobs:
   #----------------------------------------------
   # JOB 1: CI (Construir y Analizar)
   #----------------------------------------------
-  build_and_analyze:
+  build_and_test:
     name: 🧪 Build y Analizar
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Clonar repositorio
-      - name: Clonar repositorio
+      - name: 1. Clonar repositorio
         uses: actions/checkout@v4
 
-      # 2. Configurar Flutter SDK
-      - name: Configurar Flutter SDK
+      - name: 2. Configurar Java (JDK)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 3. Configurar Flutter SDK
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           cache: true
 
-      # 3. Instalar dependencias
-      - name: Instalar dependencias
+      - name: 4. Instalar dependencias
         run: flutter pub get
 
-      # 4. Analizar código (ignora warnings e info)
-      - name: Analizar código
+      - name: 5. Analizar código (ignorar warnings e info)
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
-      # 5. Construir Flutter Web
-      - name: Construir Flutter Web
+      - name: 6. Construir Flutter Web
         run: flutter build web --release --base-href /${{ github.event.repository.name }}/
 
-      # 6. Subir artefacto para GitHub Pages (solo uno, sin conflictos)
-      - name: Subir artefacto a Pages
-        uses: actions/upload-pages-artifact@v3
+      - name: 7. Subir artefacto de build
+        uses: actions/upload-artifact@v4
         with:
+          # Nombre temporal para el artefacto
+          name: flutter-build
           path: build/web
 
   #----------------------------------------------
@@ -55,7 +57,7 @@ jobs:
   #----------------------------------------------
   deploy:
     name: 🚀 Desplegar en GitHub Pages
-    needs: build_and_analyze
+    needs: build_and_test
     if: github.ref == 'refs/heads/main'
     permissions:
       pages: write
@@ -66,15 +68,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Configurar Pages
-      - name: Configurar Pages
+      - name: 1. Descargar artefacto
+        # CORRECCIÓN: La acción correcta es "download-artifact"
+        uses: actions/download-artifact@v4
+        with:
+          # El nombre debe coincidir con el artefacto subido en el job anterior
+          name: flutter-build
+
+      - name: 2. Configurar Pages
         uses: actions/configure-pages@v4
 
-      # 2. Descargar el artifact subido en el job anterior
-      - name: Descargar artefacto
-        uses: actions/download-pages-artifact@v2
+      - name: 3. Subir artefacto a Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
 
-      # 3. Desplegar
-      - name: Desplegar en GitHub Pages
+      - name: 4. Desplegar
         id: deployment
         uses: actions/deploy-pages@v4
