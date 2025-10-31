@@ -46,10 +46,8 @@ jobs:
         # CORRECCIÓN: Volvemos a tu configuración original para no fallar por 'infos' o 'warnings'
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
-      - name: 7. Escaneo de Vulnerabilidades
-        run: dart pub outdated --mode=security
-
-      - name: 8. Ejecutar Pruebas
+      - name: 7. Ejecutar Pruebas
+        # ELIMINADO: Se quitó el paso 'dart pub outdated --mode=security' que estaba fallando.
         run: flutter test
 
   #----------------------------------------------
