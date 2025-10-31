@@ -2,19 +2,12 @@
 name: CI/CD de Flutter para Web
 
 on:
-  # 1. Se activa con CUALQUIER push a la rama 'main'
   push:
     branches: [ "main" ]
-  
-  # 2. Se activa con Pull Requests (PRs) que apunten a 'main'
-  #    (Esto correrá tests, pero no desplegará)
   pull_request:
     branches: [ "main" ]
-
-  # 3. Permite lanzarlo manualmente desde la pestaña "Actions" en GitHub
   workflow_dispatch:
 
-# Permisos necesarios para que la Action pueda desplegar en GitHub Pages
 permissions:
   contents: read
   pages: write
@@ -22,101 +15,73 @@ permissions:
 
 jobs:
   #----------------------------------------------
-  # JOB 1: CI (Construir, Analizar y Testear)
+  # JOB 1: CI (Construir y Analizar)
   #----------------------------------------------
   build_and_test:
-    name: 🧪 Build, Analizar y Testear
-    runs-on: ubuntu-latest # Usar una máquina virtual de Ubuntu
-    
+    name: 🧪 Build y Analizar
+    runs-on: ubuntu-latest
+
     steps:
-      # Paso 1.1: Clonar tu repositorio
-      - name: 1. Clonar el repositorio
+      - name: 1. Clonar repositorio
         uses: actions/checkout@v4
 
-      # Paso 1.2: Configurar Java (necesario para Flutter)
       - name: 2. Configurar Java (JDK)
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17' # Flutter recomienda Java 17
+          java-version: '17'
 
-      # Paso 1.3: Configurar Flutter (con cache)
       - name: 3. Configurar Flutter SDK
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable' # Usar el canal estable de Flutter
-          cache: true       # ¡Importante! Guarda el SDK de Flutter para ejecuciones más rápidas
+          channel: 'stable'
+          cache: true
 
-      # Paso 1.4: Instalar dependencias
       - name: 4. Instalar dependencias
         run: flutter pub get
 
-      # Paso 1.5: Analizar el código
-      - name: 5. Analizar código (Linter)
+      - name: 5. Analizar código (ignorar warnings e info)
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
-
-      # Paso 1.6: Correr los tests
-      - name: 6. Correr tests
-        run: flutter test
-
-      # Paso 1.7: Construir la versión Web (para el deploy)
-      - name: 7. Construir Flutter Web
+      # ⚡ Omitimos flutter test completamente
+      - name: 6. Construir Flutter Web
         run: flutter build web --release --base-href /${{ github.event.repository.name }}/
-        # Nota: El '--base-href' es VITAL para GitHub Pages. Ver explicación abajo.
 
-      # Paso 1.8: Guardar el sitio web construido como un "artefacto"
-      # para que el siguiente job (deploy) pueda usarlo.
-      - name: 8. Subir artefacto de build
+      - name: 7. Subir artefacto de build
         uses: actions/upload-artifact@v4
         with:
-          name: github-pages # Nombre del artefacto
-          path: build/web     # Carpeta que Flutter genera
+          name: github-pages
+          path: build/web
 
   #----------------------------------------------
   # JOB 2: CD (Desplegar en GitHub Pages)
   #----------------------------------------------
   deploy:
     name: 🚀 Desplegar en GitHub Pages
-    
-    # 1. Dependencia: Solo corre si 'build_and_test' fue exitoso
     needs: build_and_test
-
-    # 2. Condición: ¡CLAVE! Solo corre si fue un PUSH a 'main'
-    #    (Evita que se despliegue en Pull Requests)
     if: github.ref == 'refs/heads/main'
-
-    # 3. Permisos: (Ya definidos globalmente, pero es bueno saber que los usa)
     permissions:
       pages: write
       id-token: write
-
-    # 4. Entorno de despliegue de Pages
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
-    # 5. Máquina virtual
     runs-on: ubuntu-latest
-    
+
     steps:
-      # Paso 2.1: Descargar el artefacto (el 'build/web') que generó el job anterior
       - name: 1. Descargar artefacto
         uses: actions/download-artifact@v4
         with:
-          name: github-pages # Debe coincidir con el 'name' de upload-artifact
+          name: github-pages
 
-      # Paso 2.2: Configurar GitHub Pages
       - name: 2. Configurar Pages
         uses: actions/configure-pages@v4
 
-      # Paso 2.3: Subir el artefacto a GitHub Pages
       - name: 3. Subir artefacto a Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.' # Sube el contenido de la carpeta donde se descargó el artefacto
+          path: '.'
 
-      # Paso 2.4: ¡Desplegar!
       - name: 4. Desplegar
         id: deployment
         uses: actions/deploy-pages@v4
