@@ -1,4 +1,4 @@
-name: CI/CD de Flutter para Web
+name: CI/CD de Flutter para Web (Mejorado)
 
 on:
   push:
@@ -14,10 +14,49 @@ permissions:
 
 jobs:
   #----------------------------------------------
-  # JOB 1: CI (Construir y Analizar)
+  # JOB 1: Lint, Pruebas y Seguridad
   #----------------------------------------------
-  build_and_test:
-    name: 🧪 Build y Analizar
+  lint_and_test:
+    name: 🛡️ Lint, Pruebas y Seguridad
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 1. Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar Java (JDK)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 3. Configurar Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: 4. Instalar dependencias
+        run: flutter pub get
+
+      - name: 5. Verificar Formato del Código
+        run: flutter format --output=none --set-exit-if-changed .
+
+      - name: 6. Analizar código (estrictamente)
+        run: flutter analyze --fatal-infos --fatal-warnings
+
+      - name: 7. Escaneo de Vulnerabilidades
+        run: dart pub outdated --mode=security
+
+      - name: 8. Ejecutar Pruebas
+        run: flutter test
+
+  #----------------------------------------------
+  # JOB 2: Construir la App Web
+  #----------------------------------------------
+  build:
+    name: 🏗️ Construir App Web
+    needs: lint_and_test # Depende del job anterior
     runs-on: ubuntu-latest
 
     steps:
@@ -39,26 +78,23 @@ jobs:
       - name: 4. Instalar dependencias
         run: flutter pub get
 
-      - name: 5. Analizar código (ignorar warnings e info)
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
-
-      - name: 6. Construir Flutter Web
+      - name: 5. Construir Flutter Web
         run: flutter build web --release --base-href /${{ github.event.repository.name }}/
 
-      - name: 7. Subir artefacto de build
+      - name: 6. Subir artefacto de build
         uses: actions/upload-artifact@v4
         with:
-          # Nombre temporal para el artefacto
+          # Nombre temporal para pasar al job de deploy
           name: flutter-build
           path: build/web
 
   #----------------------------------------------
-  # JOB 2: CD (Desplegar en GitHub Pages)
+  # JOB 3: CD (Desplegar en GitHub Pages)
   #----------------------------------------------
   deploy:
     name: 🚀 Desplegar en GitHub Pages
-    needs: build_and_test
-    if: github.ref == 'refs/heads/main'
+    needs: build # Depende del job de build
+    if: github.ref == 'refs/heads/main' # Solo se ejecuta en la rama main
     permissions:
       pages: write
       id-token: write
@@ -69,10 +105,9 @@ jobs:
 
     steps:
       - name: 1. Descargar artefacto
-        # CORRECCIÓN: La acción correcta es "download-artifact"
         uses: actions/download-artifact@v4
         with:
-          # El nombre debe coincidir con el artefacto subido en el job anterior
+          # Nombre coincide con el subido en el job 'build'
           name: flutter-build
 
       - name: 2. Configurar Pages
