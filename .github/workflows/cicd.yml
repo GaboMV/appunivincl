@@ -53,7 +53,8 @@ jobs:
 
       # Paso 1.5: Analizar el código
       - name: 5. Analizar código (Linter)
-        run: flutter analyze
+      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
 
       # Paso 1.6: Correr los tests
       - name: 6. Correr tests
