@@ -11,7 +11,7 @@ import 'package:appuniv/features/historial/providers/historial_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// 🚨 1. IMPORTAR EL ARCHIVO UTILS
+
 import 'package:appuniv/utils/date_utils.dart';
 
 enum _ModoSeleccion {
