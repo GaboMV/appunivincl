@@ -56,7 +56,7 @@ class AppStartUpWidget extends ConsumerWidget {
       // ✅ Estado de Datos (La BD está lista)
       data: (Database db) {
         final repo = ref.read(estudianteRepositoryProvider);
-        print(repo.debugPrintAllTables(db));
+        print(repo.debugPrintAllTables());
         // La instancia de Database está disponible. Podemos mostrar el Login.
         // Usamos el nombre correcto de la clase: LoginPageAccesible
         return const LoginPageAccesible();

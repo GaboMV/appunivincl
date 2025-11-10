@@ -240,4 +240,93 @@ class SolicitudInscripcion {
       'estado': estado,
     };
   }
+
+  
+}
+
+// lib/database/models/academic_models.dart
+
+// ... (todas tus clases existentes como Estudiante, Semestre, etc.) ...
+
+/// Modelo DTO (Data Transfer Object) para mostrar el historial
+/// Combina datos de Inscripciones, Materias y Paralelos.
+class HistorialMateria {
+  final String nombreMateria;
+  final String estadoDB; // El estado guardado en la BD (Cursando, Aprobada, etc.)
+  final double? parcial1;
+  final double? parcial2;
+  final double? examenFinal;
+  final double? segundoTurno;
+
+  HistorialMateria({
+    required this.nombreMateria,
+    required this.estadoDB,
+    this.parcial1,
+    this.parcial2,
+    this.examenFinal,
+    this.segundoTurno,
+  });
+
+  factory HistorialMateria.fromMap(Map<String, dynamic> map) {
+    return HistorialMateria(
+      nombreMateria: map['nombre_materia'] as String,
+      estadoDB: map['estado'] as String,
+      parcial1: map['parcial1'] as double?,
+      parcial2: map['parcial2'] as double?,
+      examenFinal: map['examen_final'] as double?,
+      segundoTurno: map['segundo_turno'] as double?,
+    );
+  }
+
+  /// Calcula la nota final visible para el estudiante
+  double get notaFinal {
+    // La nota del 2do Turno reemplaza al Examen Final
+    if (segundoTurno != null && segundoTurno! > 0) {
+      return segundoTurno!;
+    }
+    if (examenFinal != null && examenFinal! > 0) {
+      return examenFinal!;
+    }
+    // Si no hay nota final, usamos un promedio simple (o 0 si no hay notas)
+    if (parcial1 != null && parcial2 != null) {
+      return (parcial1! + parcial2!) / 2;
+    }
+    return 0;
+  }
+
+  /// Determina el estado (Aprobado/Reprobado) según la regla de nota > 50
+  String get estadoCalculado {
+    if (estadoDB.toLowerCase() == 'cursando') {
+      return "Cursando";
+    }
+    // La regla que pediste:
+    if (notaFinal > 50) {
+      return "Aprobado";
+    } else {
+      // Solo decimos "Reprobado" si tiene una nota final y no está cursando
+      if (notaFinal > 0) {
+        return "Reprobado";
+      }
+      // Si no, es un estado pendiente o sin nota
+      return "Sin nota final";
+    }
+  }
+
+  /// Genera el texto para el Text-to-Speech (TTS)
+  String get lecturaTts {
+    // Si está cursando, damos notas parciales
+    if (estadoDB.toLowerCase() == 'cursando') {
+      return 'Materia: $nombreMateria. Estado: Cursando. '
+          'Primer Parcial: ${parcial1 ?? 'Sin nota'}. '
+          'Segundo Parcial: ${parcial2 ?? 'Sin nota'}.';
+    }
+    
+    // Si ya terminó (Aprobado/Reprobado)
+    return 'Materia: $nombreMateria. Estado: $estadoCalculado. '
+        'Nota Final: ${notaFinal.toStringAsFixed(0)}. '
+        'Primer Parcial: ${parcial1 ?? 'N/A'}. '
+        'Segundo Parcial: ${parcial2 ?? 'N/A'}. '
+        'Examen Final: ${examenFinal ?? 'N/A'}. '
+        'Segundo Turno: ${segundoTurno ?? 'No aplica'}.';
+  }
 }

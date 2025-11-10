@@ -1,5 +1,7 @@
 // lib/features/home/pages/menu_principal_accesible.dart
 
+import 'package:appuniv/features/historial/presentation/historial_academico_page.dart';
+import 'package:appuniv/features/horarios/presentation/horarios_page.dart';
 import 'package:appuniv/features/login/presentation/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -55,16 +57,19 @@ class _MenuPrincipalAccesibleState
     switch (index) {
       case 0:
         accion += "Horarios.";
-        // Navegar a HorarioScreen
-        // Navigator.of(context).push(MaterialPageRoute(builder: (_) => const HorarioScreen()));
-        break;
+Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => const HorariosPageAccesible(),
+        ));        break;
       case 1:
         accion += "Inscripciones.";
         // Navegar a InscripcionesScreen
         break;
       case 2:
-        accion += "Historial de Notas.";
-        // Navegar a HistorialNotasScreen
+        accion += "Historial Académico.";
+        Navigator.of(context).push(MaterialPageRoute(
+          // Llama a la nueva página única
+          builder: (_) => const HistorialAcademicoPage(),
+        ));
         break;
     }
     tts.hablar(accion);

@@ -3,13 +3,15 @@ import 'package:sqflite/sqflite.dart';
 import '../models/academic_models.dart';
 
 class EstudianteRepository {
-  final Future<Database> dbFuture;
+  // 🚨 CAMBIO 1: Ya no es un Future. Es la base de datos real.
+  final Database _db;
 
-  EstudianteRepository(this.dbFuture);
+  // 🚨 CAMBIO 2: El constructor acepta la Database.
+  EstudianteRepository(this._db);
 
   Future<void> debugPrintAllStudents() async {
-    final db = await dbFuture;
-    final List<Map<String, dynamic>> maps = await db.query('Estudiantes');
+    // 🚨 CAMBIO 3: No más 'await dbFuture'. Usamos _db directamente.
+    final List<Map<String, dynamic>> maps = await _db.query('Estudiantes');
 
     print('==================================================');
     print('DEBUG: Contenido de la tabla Estudiantes:');
@@ -18,7 +20,7 @@ class EstudianteRepository {
     } else {
       for (var map in maps) {
         print(
-          '  Usuario ID: ${map['id_estudiante']}, Usuario: ${map['usuario']}, Contraseña: ${map['contrasena']}',
+          '   Usuario ID: ${map['id_estudiante']}, Usuario: ${map['usuario']}, Contraseña: ${map['contrasena']}',
         );
       }
     }
@@ -27,8 +29,8 @@ class EstudianteRepository {
 
   // 1. AUTENTICACIÓN
   Future<Estudiante?> authenticate(String usuario, String contrasena) async {
-    final db = await dbFuture;
-    final List<Map<String, dynamic>> maps = await db.query(
+    // 🚨 CAMBIO 4: Usamos _db directamente.
+    final List<Map<String, dynamic>> maps = await _db.query(
       'Estudiantes',
       where: 'usuario = ? AND contrasena = ?',
       whereArgs: [usuario, contrasena],
@@ -37,8 +39,9 @@ class EstudianteRepository {
     return maps.isNotEmpty ? Estudiante.fromMap(maps.first) : null;
   }
 
-  Future<void> debugPrintAllTables(Database db) async {
-    final tables = await db.query(
+  // 🚨 CAMBIO 5: Este método ya no necesita recibir 'db' como parámetro.
+  Future<void> debugPrintAllTables() async {
+    final tables = await _db.query(
       'sqlite_master',
       where: 'type = ?',
       whereArgs: ['table'],
@@ -47,8 +50,25 @@ class EstudianteRepository {
     print('==================================================');
     print('DEBUG: Tablas encontradas:');
     for (var table in tables) {
-      print('  - ${table['name']}');
+      print('   - ${table['name']}');
     }
     print('==================================================');
+  }
+
+  Future<List<Map<String, dynamic>>> getHorarioSemestre(
+    int idEstudiante,
+    String nombreSemestre,
+  ) async {
+    const sql = '''
+      SELECT ... 
+      '''; // (Tu SQL está bien)
+    
+    // 🚨 CAMBIO 6: Usamos _db directamente.
+    final List<Map<String, dynamic>> result = await _db.rawQuery(
+      sql,
+      [idEstudiante, nombreSemestre],
+    );
+
+    return result;
   }
 }

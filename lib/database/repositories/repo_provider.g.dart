@@ -7,7 +7,7 @@ part of 'repo_provider.dart';
 // **************************************************************************
 
 String _$estudianteRepositoryHash() =>
-    r'07dc9c5cd75cb6259f6d5226827494d92e74c51c';
+    r'eaae273a9d520df7d71a2b7b758fef89cb41d30b';
 
 /// See also [estudianteRepository].
 @ProviderFor(estudianteRepository)
@@ -25,7 +25,7 @@ final estudianteRepositoryProvider = Provider<EstudianteRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef EstudianteRepositoryRef = ProviderRef<EstudianteRepository>;
-String _$materiaRepositoryHash() => r'80b8b16e30c279f987cf67d5f0308c8a03debf97';
+String _$materiaRepositoryHash() => r'f619a72f6d83f9a14d93d4ff5b9ee3fe37e4b3ba';
 
 /// See also [materiaRepository].
 @ProviderFor(materiaRepository)
@@ -44,7 +44,7 @@ final materiaRepositoryProvider = Provider<MateriaRepository>.internal(
 // ignore: unused_element
 typedef MateriaRepositoryRef = ProviderRef<MateriaRepository>;
 String _$registroRepositoryHash() =>
-    r'451a0ce47012308f3315d55bc410522bce7f0399';
+    r'c4d1d1c014cd2f1abfcadf222a13e4b4d1e43f7d';
 
 /// See also [registroRepository].
 @ProviderFor(registroRepository)
