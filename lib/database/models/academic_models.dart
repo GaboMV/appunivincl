@@ -240,8 +240,6 @@ class SolicitudInscripcion {
       'estado': estado,
     };
   }
-
-  
 }
 
 // lib/database/models/academic_models.dart
@@ -252,7 +250,8 @@ class SolicitudInscripcion {
 /// Combina datos de Inscripciones, Materias y Paralelos.
 class HistorialMateria {
   final String nombreMateria;
-  final String estadoDB; // El estado guardado en la BD (Cursando, Aprobada, etc.)
+  final String
+  estadoDB; // El estado guardado en la BD (Cursando, Aprobada, etc.)
   final double? parcial1;
   final double? parcial2;
   final double? examenFinal;
@@ -320,7 +319,7 @@ class HistorialMateria {
           'Primer Parcial: ${parcial1 ?? 'Sin nota'}. '
           'Segundo Parcial: ${parcial2 ?? 'Sin nota'}.';
     }
-    
+
     // Si ya terminó (Aprobado/Reprobado)
     return 'Materia: $nombreMateria. Estado: $estadoCalculado. '
         'Nota Final: ${notaFinal.toStringAsFixed(0)}. '

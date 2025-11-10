@@ -10,7 +10,8 @@ import 'registro_repository.dart';
 part 'repo_provider.g.dart';
 
 // Esta función centraliza la lógica para obtener la BD.
-Database _getDb(ProviderRef ref) { // 🚨 Usamos ProviderRef genérico
+Database _getDb(ProviderRef ref) {
+  // 🚨 Usamos ProviderRef genérico
   final dbAsyncValue = ref.watch(databaseInstanceProvider);
 
   // 🚨 LA CORRECCIÓN ESTÁ AQUÍ 🚨

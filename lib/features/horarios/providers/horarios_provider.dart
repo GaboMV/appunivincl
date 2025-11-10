@@ -9,24 +9,23 @@ part 'horarios_provider.g.dart'; // Asegúrate que esto coincida
 
 // Mod// lib/features/horarios/providers/horarios_provider.dart
 
-
 // --- FUNCIONES AUXILIARES PARA EL FORMATO DE HORA ---
 String _convertirA12Horas(String hora24) {
   try {
     final partes = hora24.split(':');
     int hora = int.parse(partes[0]);
     final String minutos = partes[1];
-    
+
     final String ampm = hora >= 12 ? 'PM' : 'AM';
-    
+
     if (hora == 0) hora = 12; // 00:xx es 12 AM
     if (hora > 12) hora -= 12;
 
     // TTS lee "8 y 00 AM" mejor que "8:00 AM"
     // Usamos $minutos aunque sea "00" para evitar ambigüedades.
-    return '$hora y $minutos $ampm'; 
+    return '$hora y $minutos $ampm';
   } catch (e) {
-    return hora24; 
+    return hora24;
   }
 }
 
@@ -68,7 +67,7 @@ class _HorarioItem {
   String toTtsString() {
     final horaInicio12h = _convertirA12Horas(horaInicio.substring(0, 5));
     final horaFin12h = _convertirA12Horas(horaFin.substring(0, 5));
-    
+
     // Frase completa con formato 12h y nombre COMPLETO del docente.
     return "De $horaInicio12h a $horaFin12h, ${nombreMateria} en el aula ${nombreAula} con ${nombreDocente} ${apellidoDocente}.";
   }
@@ -79,16 +78,15 @@ class _HorarioItem {
 
 @riverpod
 Future<Map<String, String>> horarioProcesado(HorarioProcesadoRef ref) async {
-  
   final estudiante = ref.watch(sessionNotifierProvider).estudiante;
   if (estudiante == null) {
     throw Exception("No hay sesión de estudiante activa.");
   }
 
-  final repo = ref.watch(registroRepositoryProvider); 
-  final nombreSemestreActual = getNombreSemestreActual(); 
+  final repo = ref.watch(registroRepositoryProvider);
+  final nombreSemestreActual = getNombreSemestreActual();
 
-  final rawData = await repo.getHorarioEstudiante( 
+  final rawData = await repo.getHorarioEstudiante(
     estudiante.id,
     nombreSemestreActual,
   );
@@ -117,16 +115,17 @@ Future<Map<String, String>> horarioProcesado(HorarioProcesadoRef ref) async {
 
   horarioFinal.forEach((dia, defaultMsg) {
     // Esta lógica de comparación de días es correcta para manejar acentos
-    final diaSinAcento = dia.toLowerCase()
-      .replaceAll('á', 'a')
-      .replaceAll('é', 'e')
-      .replaceAll('í', 'i')
-      .replaceAll('ó', 'o')
-      .replaceAll('ú', 'u');
-      
+    final diaSinAcento = dia
+        .toLowerCase()
+        .replaceAll('á', 'a')
+        .replaceAll('é', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ó', 'o')
+        .replaceAll('ú', 'u');
+
     final claveEncontrada = lecturasPorDia.keys.firstWhere(
-        (k) => k.toLowerCase() == diaSinAcento,
-        orElse: () => '',
+      (k) => k.toLowerCase() == diaSinAcento,
+      orElse: () => '',
     );
 
     if (claveEncontrada.isNotEmpty) {

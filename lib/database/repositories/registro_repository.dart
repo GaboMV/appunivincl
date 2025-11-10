@@ -1,7 +1,7 @@
 // lib/data/repositories/registro_repository.dart
 import 'package:sqflite/sqflite.dart';
 // 🚨 Asegúrate de que la ruta a tus modelos sea correcta
-import '../models/academic_models.dart'; 
+import '../models/academic_models.dart';
 
 class RegistroRepository {
   final Database _db;
@@ -55,10 +55,10 @@ class RegistroRepository {
   // ===============================================
 
   Future<int> inscribirEstudiante(int idEstudiante, int idParalelo) async {
-    // NOTA: Asumimos que la lógica de 'cumpleRequisitos' 
+    // NOTA: Asumimos que la lógica de 'cumpleRequisitos'
     // y 'choqueDeHorario' se valida en el Provider (capa de lógica)
     // antes de llamar a este método de repositorio.
-    
+
     final inscripcion = {
       'id_estudiante': idEstudiante,
       'id_paralelo': idParalelo,
@@ -116,14 +116,16 @@ class RegistroRepository {
     // Tus prints de Debug son muy útiles, los mantenemos
     print('======================================================');
     print('DEBUG: Ejecutando getHorarioEstudiante');
-    print('Argumentos: [idEstudiante: $idEstudiante, nombreSemestre: $nombreSemestre]');
+    print(
+      'Argumentos: [idEstudiante: $idEstudiante, nombreSemestre: $nombreSemestre]',
+    );
     print('======================================================');
 
     try {
-      final List<Map<String, dynamic>> result = await _db.rawQuery(
-        sql,
-        [idEstudiante, nombreSemestre],
-      );
+      final List<Map<String, dynamic>> result = await _db.rawQuery(sql, [
+        idEstudiante,
+        nombreSemestre,
+      ]);
 
       print('DEBUG: Resultado de la consulta SQL (getHorarioEstudiante):');
       if (result.isEmpty) {
@@ -160,15 +162,18 @@ class RegistroRepository {
       ORDER BY S.nombre DESC; 
     ''';
 
-    final List<Map<String, dynamic>> maps = await _db.rawQuery(sql, [idEstudiante]);
+    final List<Map<String, dynamic>> maps = await _db.rawQuery(sql, [
+      idEstudiante,
+    ]);
     return maps.map((map) => Semestre.fromMap(map)).toList();
   }
 
   /// 2. Obtiene el detalle de materias y notas para un semestre específico.
   /// (Reemplaza tu 'getNotasPorSemestre' para usar el DTO HistorialMateria)
   Future<List<HistorialMateria>> getHistorialPorSemestre(
-      int idEstudiante, int idSemestre) async {
-        
+    int idEstudiante,
+    int idSemestre,
+  ) async {
     const sql = '''
       SELECT 
         M.nombre AS nombre_materia,
@@ -183,7 +188,10 @@ class RegistroRepository {
       WHERE I.id_estudiante = ? AND PS.id_semestre = ?;
     ''';
 
-    final List<Map<String, dynamic>> maps = await _db.rawQuery(sql, [idEstudiante, idSemestre]);
+    final List<Map<String, dynamic>> maps = await _db.rawQuery(sql, [
+      idEstudiante,
+      idSemestre,
+    ]);
     // Usamos el nuevo modelo HistorialMateria del Paso 1
     return maps.map((map) => HistorialMateria.fromMap(map)).toList();
   }
@@ -197,7 +205,6 @@ class RegistroRepository {
     int idParalelo,
     String motivo,
   ) async {
-    
     // (Asumimos que el modelo SolicitudInscripcion existe en academic_models.dart)
     // Si no existe, este mapa simple también funciona:
     final map = {

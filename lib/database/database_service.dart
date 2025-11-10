@@ -76,116 +76,259 @@ class DatabaseService {
   // ... (tus imports y la clase DatabaseService)
 
   // 🚨 NUEVO MÉTODO PARA INSERTAR DATOS INICIALES (USANDO TRANSACCIÓN SEGURA) 🚨
-// lib/data/database/database_service.dart
-// ... (dentro de la clase DatabaseService)
+  // lib/data/database/database_service.dart
+  // ... (dentro de la clase DatabaseService)
 
   // 🚨 ===================================================================== 🚨
   // 🚨 REEMPLAZA TU MÉTODO _seedDatabase COMPLETO CON ESTE "MEGA-DEBUG" 🚨
   // 🚨 ===================================================================== 🚨
-Future<void> _seedDatabase(Database db) async {
+  Future<void> _seedDatabase(Database db) async {
     await db.transaction((txn) async {
       print('🌱 Ejecutando _seedDatabase... (Versión UNIFICADA)');
-      
+
       // --- 1. SEMESTRES (Formato cronológico unificado) ---
-      final int semVerano25Id = await txn.insert('Semestres', {'nombre': '2025-1 Verano'});
-      final int sem1_25Id = await txn.insert('Semestres', {'nombre': '2025-2 Semestre 1'});
-      final int semInvierno25Id = await txn.insert('Semestres', {'nombre': '2025-3 Invierno'});
-      final int sem2_25Id = await txn.insert('Semestres', {'nombre': '2025-4 Semestre 2'}); // <-- Este es el "actual"
-      final int sem1_24Id = await txn.insert('Semestres', {'nombre': '2024-2 Semestre 1'});
-      final int sem2_23Id = await txn.insert('Semestres', {'nombre': '2023-4 Semestre 2'});
+      final int semVerano25Id = await txn.insert('Semestres', {
+        'nombre': '2025-1 Verano',
+      });
+      final int sem1_25Id = await txn.insert('Semestres', {
+        'nombre': '2025-2 Semestre 1',
+      });
+      final int semInvierno25Id = await txn.insert('Semestres', {
+        'nombre': '2025-3 Invierno',
+      });
+      final int sem2_25Id = await txn.insert('Semestres', {
+        'nombre': '2025-4 Semestre 2',
+      }); // <-- Este es el "actual"
+      final int sem1_24Id = await txn.insert('Semestres', {
+        'nombre': '2024-2 Semestre 1',
+      });
+      final int sem2_23Id = await txn.insert('Semestres', {
+        'nombre': '2023-4 Semestre 2',
+      });
 
       // --- ESTRUCTURAS BÁSICAS ---
-      final int facIngId = await txn.insert('Facultades', {'nombre': 'Ingeniería'});
+      final int facIngId = await txn.insert('Facultades', {
+        'nombre': 'Ingeniería',
+      });
       final int aulaA1Id = await txn.insert('Aulas', {'nombre': 'Aula A-10'});
       final int aulaB2Id = await txn.insert('Aulas', {'nombre': 'Aula B-20'});
-      final int docGomezId = await txn.insert('Docentes', {'nombre': 'Ana', 'apellido': 'Gomez'});
-      final int docLopezId = await txn.insert('Docentes', {'nombre': 'Roberto', 'apellido': 'Lopez'});
+      final int docGomezId = await txn.insert('Docentes', {
+        'nombre': 'Ana',
+        'apellido': 'Gomez',
+      });
+      final int docLopezId = await txn.insert('Docentes', {
+        'nombre': 'Roberto',
+        'apellido': 'Lopez',
+      });
 
       // --- 3. ESTUDIANTE ---
       final int estPerezId = await txn.insert('Estudiantes', {
-        'usuario': 'jperez', 'contrasena': 'contraseña123', 'nombre': 'José', 'apellido': 'Perez',
+        'usuario': 'jperez',
+        'contrasena': 'contraseña123',
+        'nombre': 'José',
+        'apellido': 'Perez',
       }, conflictAlgorithm: ConflictAlgorithm.replace);
 
       // --- 4. MATERIAS ---
-      final int matCalc1Id = await txn.insert('Materias', {'codigo': 'MAT-101', 'nombre': 'Cálculo I', 'id_facultad': facIngId});
-      final int matCalc2Id = await txn.insert('Materias', {'codigo': 'MAT-102', 'nombre': 'Cálculo II', 'id_facultad': facIngId});
-      final int matFis1Id = await txn.insert('Materias', {'codigo': 'FIS-101', 'nombre': 'Física I', 'id_facultad': facIngId});
-      final int matAlg1Id = await txn.insert('Materias', {'codigo': 'MAT-100', 'nombre': 'Álgebra I', 'id_facultad': facIngId});
-      final int matFis0Id = await txn.insert('Materias', {'codigo': 'FIS-100', 'nombre': 'Física Básica', 'id_facultad': facIngId});
-      final int matIntroProgId = await txn.insert('Materias', {'codigo': 'CS-100', 'nombre': 'Intro. a la Programación', 'id_facultad': facIngId});
-
+      final int matCalc1Id = await txn.insert('Materias', {
+        'codigo': 'MAT-101',
+        'nombre': 'Cálculo I',
+        'id_facultad': facIngId,
+      });
+      final int matCalc2Id = await txn.insert('Materias', {
+        'codigo': 'MAT-102',
+        'nombre': 'Cálculo II',
+        'id_facultad': facIngId,
+      });
+      final int matFis1Id = await txn.insert('Materias', {
+        'codigo': 'FIS-101',
+        'nombre': 'Física I',
+        'id_facultad': facIngId,
+      });
+      final int matAlg1Id = await txn.insert('Materias', {
+        'codigo': 'MAT-100',
+        'nombre': 'Álgebra I',
+        'id_facultad': facIngId,
+      });
+      final int matFis0Id = await txn.insert('Materias', {
+        'codigo': 'FIS-100',
+        'nombre': 'Física Básica',
+        'id_facultad': facIngId,
+      });
+      final int matIntroProgId = await txn.insert('Materias', {
+        'codigo': 'CS-100',
+        'nombre': 'Intro. a la Programación',
+        'id_facultad': facIngId,
+      });
 
       // --- 7. OFERTA DE MATERIAS (PARALELOS_SEMESTRE) ---
       // Semestre "Actual" (2025-4 Semestre 2)
-      final int parActualCalc2Id = await txn.insert('Paralelos_Semestre', {'id_materia': matCalc2Id, 'id_docente': docGomezId, 'id_semestre': sem2_25Id, 'id_aula': aulaA1Id, 'nombre_paralelo': 'A'});
-      final int parActualFis1Id = await txn.insert('Paralelos_Semestre', {'id_materia': matFis1Id, 'id_docente': docLopezId, 'id_semestre': sem2_25Id, 'id_aula': aulaB2Id, 'nombre_paralelo': 'B'});
-      
-      // Resto del historial
-      final int par_1_25_Calc1Id = await txn.insert('Paralelos_Semestre', {'id_materia': matCalc1Id, 'id_docente': docGomezId, 'id_semestre': sem1_25Id, 'id_aula': aulaA1Id, 'nombre_paralelo': 'A'});
-      final int parVerano25Calc1Id = await txn.insert('Paralelos_Semestre', {'id_materia': matCalc1Id, 'id_docente': docGomezId, 'id_semestre': semVerano25Id, 'id_aula': aulaA1Id, 'nombre_paralelo': 'V'});
-      final int par_1_24_Alg1Id = await txn.insert('Paralelos_Semestre', {'id_materia': matAlg1Id, 'id_docente': docLopezId, 'id_semestre': sem1_24Id, 'id_aula': aulaB2Id, 'nombre_paralelo': 'C'});
-      final int par_2_23_Fis0Id = await txn.insert('Paralelos_Semestre', {'id_materia': matFis0Id, 'id_docente': docLopezId, 'id_semestre': sem2_23Id, 'id_aula': aulaB2Id, 'nombre_paralelo': 'D'});
-      final int parInvierno25Id = await txn.insert('Paralelos_Semestre', {'id_materia': matIntroProgId, 'id_docente': docGomezId, 'id_semestre': semInvierno25Id, 'id_aula': aulaA1Id, 'nombre_paralelo': 'W'});
+      final int parActualCalc2Id = await txn.insert('Paralelos_Semestre', {
+        'id_materia': matCalc2Id,
+        'id_docente': docGomezId,
+        'id_semestre': sem2_25Id,
+        'id_aula': aulaA1Id,
+        'nombre_paralelo': 'A',
+      });
+      final int parActualFis1Id = await txn.insert('Paralelos_Semestre', {
+        'id_materia': matFis1Id,
+        'id_docente': docLopezId,
+        'id_semestre': sem2_25Id,
+        'id_aula': aulaB2Id,
+        'nombre_paralelo': 'B',
+      });
 
+      // Resto del historial
+      final int par_1_25_Calc1Id = await txn.insert('Paralelos_Semestre', {
+        'id_materia': matCalc1Id,
+        'id_docente': docGomezId,
+        'id_semestre': sem1_25Id,
+        'id_aula': aulaA1Id,
+        'nombre_paralelo': 'A',
+      });
+      final int parVerano25Calc1Id = await txn.insert('Paralelos_Semestre', {
+        'id_materia': matCalc1Id,
+        'id_docente': docGomezId,
+        'id_semestre': semVerano25Id,
+        'id_aula': aulaA1Id,
+        'nombre_paralelo': 'V',
+      });
+      final int par_1_24_Alg1Id = await txn.insert('Paralelos_Semestre', {
+        'id_materia': matAlg1Id,
+        'id_docente': docLopezId,
+        'id_semestre': sem1_24Id,
+        'id_aula': aulaB2Id,
+        'nombre_paralelo': 'C',
+      });
+      final int par_2_23_Fis0Id = await txn.insert('Paralelos_Semestre', {
+        'id_materia': matFis0Id,
+        'id_docente': docLopezId,
+        'id_semestre': sem2_23Id,
+        'id_aula': aulaB2Id,
+        'nombre_paralelo': 'D',
+      });
+      final int parInvierno25Id = await txn.insert('Paralelos_Semestre', {
+        'id_materia': matIntroProgId,
+        'id_docente': docGomezId,
+        'id_semestre': semInvierno25Id,
+        'id_aula': aulaA1Id,
+        'nombre_paralelo': 'W',
+      });
 
       // --- 8. ASIGNACIÓN DE HORARIOS (¡IMPORTANTE PARA LA PANTALLA DE HORARIOS!) ---
       // Estos son los horarios para el semestre "actual" (2025-4 Semestre 2)
-      final int h1Id = await txn.insert('Horarios', {'dia': 'Lunes', 'hora_inicio': '08:00', 'hora_fin': '10:00'});
-      final int h3Id = await txn.insert('Horarios', {'dia': 'Miércoles', 'hora_inicio': '08:00', 'hora_fin': '10:00'});
-      final int h5Id = await txn.insert('Horarios', {'dia': 'Lunes', 'hora_inicio': '10:00', 'hora_fin': '12:00'});
-      final int h6Id = await txn.insert('Horarios', {'dia': 'Miércoles', 'hora_inicio': '10:00', 'hora_fin': '12:00'});
-      
-      // Asignar horarios a Cálculo II
-      await txn.insert('Paralelo_Horario', {'id_paralelo': parActualCalc2Id, 'id_horario': h1Id});
-      await txn.insert('Paralelo_Horario', {'id_paralelo': parActualCalc2Id, 'id_horario': h3Id});
-      // Asignar horarios a Física I
-      await txn.insert('Paralelo_Horario', {'id_paralelo': parActualFis1Id, 'id_horario': h5Id});
-      await txn.insert('Paralelo_Horario', {'id_paralelo': parActualFis1Id, 'id_horario': h6Id});
+      final int h1Id = await txn.insert('Horarios', {
+        'dia': 'Lunes',
+        'hora_inicio': '08:00',
+        'hora_fin': '10:00',
+      });
+      final int h3Id = await txn.insert('Horarios', {
+        'dia': 'Miércoles',
+        'hora_inicio': '08:00',
+        'hora_fin': '10:00',
+      });
+      final int h5Id = await txn.insert('Horarios', {
+        'dia': 'Lunes',
+        'hora_inicio': '10:00',
+        'hora_fin': '12:00',
+      });
+      final int h6Id = await txn.insert('Horarios', {
+        'dia': 'Miércoles',
+        'hora_inicio': '10:00',
+        'hora_fin': '12:00',
+      });
 
+      // Asignar horarios a Cálculo II
+      await txn.insert('Paralelo_Horario', {
+        'id_paralelo': parActualCalc2Id,
+        'id_horario': h1Id,
+      });
+      await txn.insert('Paralelo_Horario', {
+        'id_paralelo': parActualCalc2Id,
+        'id_horario': h3Id,
+      });
+      // Asignar horarios a Física I
+      await txn.insert('Paralelo_Horario', {
+        'id_paralelo': parActualFis1Id,
+        'id_horario': h5Id,
+      });
+      await txn.insert('Paralelo_Horario', {
+        'id_paralelo': parActualFis1Id,
+        'id_horario': h6Id,
+      });
 
       // --- 9. HISTORIAL DE INSCRIPCIONES (¡IMPORTANTE PARA AMBAS PANTALLAS!) ---
-      
+
       // "2025-4 Semestre 2" -> Cursando (Para la pantalla de Horarios)
       await txn.insert('Inscripciones', {
-        'id_estudiante': estPerezId, 'id_paralelo': parActualCalc2Id, 'estado': 'Cursando', 
-        'fecha_inscripcion': DateTime.now().toIso8601String(), 'parcial1': 75.0
+        'id_estudiante': estPerezId,
+        'id_paralelo': parActualCalc2Id,
+        'estado': 'Cursando',
+        'fecha_inscripcion': DateTime.now().toIso8601String(),
+        'parcial1': 75.0,
       });
       await txn.insert('Inscripciones', {
-        'id_estudiante': estPerezId, 'id_paralelo': parActualFis1Id, 'estado': 'Cursando', 
-        'fecha_inscripcion': DateTime.now().toIso8601String(), 'parcial1': 55.0, 'parcial2': 61.0
+        'id_estudiante': estPerezId,
+        'id_paralelo': parActualFis1Id,
+        'estado': 'Cursando',
+        'fecha_inscripcion': DateTime.now().toIso8601String(),
+        'parcial1': 55.0,
+        'parcial2': 61.0,
       });
 
       // "2025-3 Invierno" -> Aprobada (Para el Historial)
       await txn.insert('Inscripciones', {
-        'id_estudiante': estPerezId, 'id_paralelo': parInvierno25Id, 'estado': 'Aprobada', 
-        'parcial1': 90.0, 'parcial2': 92.0, 'examen_final': 95.0
+        'id_estudiante': estPerezId,
+        'id_paralelo': parInvierno25Id,
+        'estado': 'Aprobada',
+        'parcial1': 90.0,
+        'parcial2': 92.0,
+        'examen_final': 95.0,
       });
 
       // "2025-2 Semestre 1" -> Aprobada (Para el Historial)
       await txn.insert('Inscripciones', {
-        'id_estudiante': estPerezId, 'id_paralelo': par_1_25_Calc1Id, 'estado': 'Aprobada', 
-        'parcial1': 80.0, 'parcial2': 85.0, 'examen_final': 90.0
+        'id_estudiante': estPerezId,
+        'id_paralelo': par_1_25_Calc1Id,
+        'estado': 'Aprobada',
+        'parcial1': 80.0,
+        'parcial2': 85.0,
+        'examen_final': 90.0,
       });
 
       // "2025-1 Verano" -> Reprobada (Para el Historial)
       await txn.insert('Inscripciones', {
-        'id_estudiante': estPerezId, 'id_paralelo': parVerano25Calc1Id, 'estado': 'Reprobada', 
-        'parcial1': 30.0, 'parcial2': 35.0, 'examen_final': 40.0
+        'id_estudiante': estPerezId,
+        'id_paralelo': parVerano25Calc1Id,
+        'estado': 'Reprobada',
+        'parcial1': 30.0,
+        'parcial2': 35.0,
+        'examen_final': 40.0,
       });
-      
+
       // "2024-2 Semestre 1" -> Aprobada (Para el Historial)
       await txn.insert('Inscripciones', {
-        'id_estudiante': estPerezId, 'id_paralelo': par_1_24_Alg1Id, 'estado': 'Aprobada', 
-        'parcial1': 70.0, 'parcial2': 78.0, 'examen_final': 80.0
+        'id_estudiante': estPerezId,
+        'id_paralelo': par_1_24_Alg1Id,
+        'estado': 'Aprobada',
+        'parcial1': 70.0,
+        'parcial2': 78.0,
+        'examen_final': 80.0,
       });
 
       // "2023-4 Semestre 2" -> Aprobada (Para el Historial)
       await txn.insert('Inscripciones', {
-        'id_estudiante': estPerezId, 'id_paralelo': par_2_23_Fis0Id, 'estado': 'Aprobada', 
-        'parcial1': 60.0, 'parcial2': 66.0, 'examen_final': 70.0
+        'id_estudiante': estPerezId,
+        'id_paralelo': par_2_23_Fis0Id,
+        'estado': 'Aprobada',
+        'parcial1': 60.0,
+        'parcial2': 66.0,
+        'examen_final': 70.0,
       });
 
-      print('✅ BASE DE DATOS SEMBRADA (Versión UNIFICADA). Lista para probar HORARIOS e HISTORIAL.');
+      print(
+        '✅ BASE DE DATOS SEMBRADA (Versión UNIFICADA). Lista para probar HORARIOS e HISTORIAL.',
+      );
     });
   }
 }

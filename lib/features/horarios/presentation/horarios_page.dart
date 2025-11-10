@@ -15,8 +15,7 @@ class HorariosPageAccesible extends ConsumerStatefulWidget {
       _HorariosPageAccesibleState();
 }
 
-class _HorariosPageAccesibleState
-    extends ConsumerState<HorariosPageAccesible> {
+class _HorariosPageAccesibleState extends ConsumerState<HorariosPageAccesible> {
   final tts = TtsService();
   int _campoActual = 0;
   final List<String> _dias = [
@@ -41,15 +40,15 @@ class _HorariosPageAccesibleState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // 🚨 3. LÓGICA DE BIENVENIDA ACTUALIZADA
-      
+
       // Obtenemos el nombre del semestre actual (ej: "2025-4 Semestre 2")
-      final String nombreSemestre = getNombreSemestreActual(); 
+      final String nombreSemestre = getNombreSemestreActual();
       // Lo limpiamos para el TTS (ej: "2025 4 Semestre 2")
       final String nombreLimpio = _limpiarNombreSemestre(nombreSemestre);
 
       // Hablamos el nuevo mensaje
       tts.hablar(
-        "Mis horarios del semestre actual. Semestre actual: $nombreLimpio. Selecciona un día."
+        "Mis horarios del semestre actual. Semestre actual: $nombreLimpio. Selecciona un día.",
       );
     });
   }
@@ -62,7 +61,7 @@ class _HorariosPageAccesibleState
     final diaSeleccionado = _dias[_campoActual];
     final lectura =
         horarioData[diaSeleccionado] ?? "No se encontró horario para este día.";
-    
+
     tts.hablar("$diaSeleccionado: $lectura");
   }
 
@@ -75,7 +74,7 @@ class _HorariosPageAccesibleState
       appBar: AppBar(
         title: const Text("Mi Horario (Semestre Actual)"),
         backgroundColor: Colors.grey[900],
-        automaticallyImplyLeading: false, 
+        automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
@@ -96,27 +95,32 @@ class _HorariosPageAccesibleState
                 );
               },
               // ⏳ Cargando
-              loading: () => const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(color: Colors.greenAccent),
-                    SizedBox(height: 16),
-                    Text("Cargando horario...", style: TextStyle(color: Colors.white)),
-                  ],
-                ),
-              ),
-              // ❌ Error
-              error: (e, s) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Text(
-                    "Error al cargar el horario: ${e.toString()}",
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
+              loading:
+                  () => const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(color: Colors.greenAccent),
+                        SizedBox(height: 16),
+                        Text(
+                          "Cargando horario...",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ),
+              // ❌ Error
+              error:
+                  (e, s) => Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text(
+                        "Error al cargar el horario: ${e.toString()}",
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
             ),
           ),
           // --- Panel de Navegación ---
@@ -134,9 +138,8 @@ class _HorariosPageAccesibleState
     bool seleccionado,
     int index,
   ) {
-    String resumenUI = (resumen == "Sin clases programadas.")
-        ? "Libre"
-        : "Ver detalles...";
+    String resumenUI =
+        (resumen == "Sin clases programadas.") ? "Libre" : "Ver detalles...";
 
     return GestureDetector(
       onTap: () {
@@ -149,9 +152,10 @@ class _HorariosPageAccesibleState
         decoration: BoxDecoration(
           color: seleccionado ? Colors.teal[700] : Colors.grey[900],
           borderRadius: BorderRadius.circular(16),
-          border: seleccionado
-              ? Border.all(color: Colors.tealAccent, width: 2)
-              : null,
+          border:
+              seleccionado
+                  ? Border.all(color: Colors.tealAccent, width: 2)
+                  : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -228,11 +232,18 @@ class _HorariosPageAccesibleState
       onPressed: habilitado ? accion : null,
       child: Column(
         children: [
-          Icon(icono, size: 32, color: Colors.white.withOpacity(habilitado ? 1.0 : 0.5)),
+          Icon(
+            icono,
+            size: 32,
+            color: Colors.white.withOpacity(habilitado ? 1.0 : 0.5),
+          ),
           const SizedBox(height: 8),
           Text(
             texto,
-            style: TextStyle(fontSize: 18, color: Colors.white.withOpacity(habilitado ? 1.0 : 0.5)),
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.white.withOpacity(habilitado ? 1.0 : 0.5),
+            ),
           ),
         ],
       ),

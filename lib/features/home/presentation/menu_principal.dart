@@ -57,19 +57,22 @@ class _MenuPrincipalAccesibleState
     switch (index) {
       case 0:
         accion += "Horarios.";
-Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => const HorariosPageAccesible(),
-        ));        break;
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const HorariosPageAccesible()),
+        );
+        break;
       case 1:
         accion += "Inscripciones.";
         // Navegar a InscripcionesScreen
         break;
       case 2:
         accion += "Historial Académico.";
-        Navigator.of(context).push(MaterialPageRoute(
-          // Llama a la nueva página única
-          builder: (_) => const HistorialAcademicoPage(),
-        ));
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            // Llama a la nueva página única
+            builder: (_) => const HistorialAcademicoPage(),
+          ),
+        );
         break;
     }
     tts.hablar(accion);

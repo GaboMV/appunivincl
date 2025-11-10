@@ -62,12 +62,12 @@ class EstudianteRepository {
     const sql = '''
       SELECT ... 
       '''; // (Tu SQL está bien)
-    
+
     // 🚨 CAMBIO 6: Usamos _db directamente.
-    final List<Map<String, dynamic>> result = await _db.rawQuery(
-      sql,
-      [idEstudiante, nombreSemestre],
-    );
+    final List<Map<String, dynamic>> result = await _db.rawQuery(sql, [
+      idEstudiante,
+      nombreSemestre,
+    ]);
 
     return result;
   }
