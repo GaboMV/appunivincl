@@ -17,7 +17,7 @@ import 'package:sqflite/sqflite.dart'; // Necesario para la consulta de semestre
 part 'inscripcion_providers.g.dart';
 
 // lib/features
-// (Facultades, MateriasPorFacultad, MateriasPorBusqueda, ParalelosMateria... 
+// (Facultades, MateriasPorFacultad, MateriasPorBusqueda, ParalelosMateria...
 // ...todos estos se quedan exactamente igual que antes)
 
 @Riverpod(keepAlive: true)
@@ -28,14 +28,18 @@ Future<List<Facultad>> facultades(FacultadesRef ref) {
 
 @Riverpod(keepAlive: true)
 Future<List<Materia>> materiasPorFacultad(
-    MateriasPorFacultadRef ref, int idFacultad) {
+  MateriasPorFacultadRef ref,
+  int idFacultad,
+) {
   final materiaRepo = ref.watch(materiaRepositoryProvider);
   return materiaRepo.getMateriasByFacultad(idFacultad);
 }
 
 @Riverpod(keepAlive: true)
 Future<List<Materia>> materiasPorBusqueda(
-    MateriasPorBusquedaRef ref, String query) {
+  MateriasPorBusquedaRef ref,
+  String query,
+) {
   if (query.trim().isEmpty) {
     return Future.value([]);
   }
@@ -45,19 +49,24 @@ Future<List<Materia>> materiasPorBusqueda(
 
 @Riverpod(keepAlive: true)
 Future<List<ParaleloDetalleCompleto>> paralelosMateria(
-    ParalelosMateriaRef ref, int idMateria) async {
-      
+  ParalelosMateriaRef ref,
+  int idMateria,
+) async {
   final materiaRepo = ref.watch(materiaRepositoryProvider);
   final registroRepo = ref.watch(registroRepositoryProvider);
   final estudiante = ref.read(sessionNotifierProvider).estudiante;
   final db = await ref.read(databaseInstanceProvider.future);
-  
+
   if (estudiante == null) throw Exception("No autenticado");
   final idEstudiante = estudiante.id_estudiante;
 
   final nombreSemestreActual = getNombreSemestreActual();
-  final semestreMap = await db.query('Semestres',
-      where: 'nombre = ?', whereArgs: [nombreSemestreActual], limit: 1);
+  final semestreMap = await db.query(
+    'Semestres',
+    where: 'nombre = ?',
+    whereArgs: [nombreSemestreActual],
+    limit: 1,
+  );
   if (semestreMap.isEmpty) {
     throw Exception("Semestre actual $nombreSemestreActual no encontrado.");
   }
@@ -76,21 +85,22 @@ Future<List<ParaleloDetalleCompleto>> paralelosMateria(
     idSemestreActual: idSemestreActual,
   );
 
-  final List<ParaleloDetalleCompleto> paralelosCompletos =
-      await Future.wait(paralelosSimples.map((paraleloSimple) async {
-    final horarios =
-        await materiaRepo.getHorariosString(paraleloSimple.idParalelo);
-    return ParaleloDetalleCompleto(
-      paralelo: paraleloSimple,
-      horarios: horarios,
-      requisitos: requisitos,
-      cumpleRequisitos: cumpleReq,
-    );
-  }));
+  final List<ParaleloDetalleCompleto> paralelosCompletos = await Future.wait(
+    paralelosSimples.map((paraleloSimple) async {
+      final horarios = await materiaRepo.getHorariosString(
+        paraleloSimple.idParalelo,
+      );
+      return ParaleloDetalleCompleto(
+        paralelo: paraleloSimple,
+        horarios: horarios,
+        requisitos: requisitos,
+        cumpleRequisitos: cumpleReq,
+      );
+    }),
+  );
 
   return paralelosCompletos;
 }
-
 
 // --- PROVEEDOR DE LÓGICA (escritura) ---
 
@@ -105,12 +115,16 @@ class InscripcionService extends _$InscripcionService {
     final registroRepo = ref.read(registroRepositoryProvider);
     return (estudiante, registroRepo);
   }
-  
+
   Future<(int, Database)> _getSemestreActualId() async {
     final db = await ref.read(databaseInstanceProvider.future);
     final nombreSemestreActual = getNombreSemestreActual();
-    final semestreMap = await db.query('Semestres',
-        where: 'nombre = ?', whereArgs: [nombreSemestreActual], limit: 1);
+    final semestreMap = await db.query(
+      'Semestres',
+      where: 'nombre = ?',
+      whereArgs: [nombreSemestreActual],
+      limit: 1,
+    );
     if (semestreMap.isEmpty) {
       throw Exception("Semestre actual $nombreSemestreActual no encontrado.");
     }
@@ -120,13 +134,13 @@ class InscripcionService extends _$InscripcionService {
   void _invalidateExternalCaches(int idMateria) {
     ref.invalidate(paralelosMateriaProvider(idMateria));
     ref.invalidate(historialSemestresProvider);
-    ref.invalidate(historialMateriasProvider); 
-    
+    ref.invalidate(historialMateriasProvider);
+
     // 🚨 ======================================================
     // 🚨 FIX: Invalidar el provider PÚBLICO
     // 🚨 ======================================================
-    ref.invalidate(horarioEstudianteProvider); 
-    
+    ref.invalidate(horarioEstudianteProvider);
+
     debugPrint("LOG: Caches de Historial, Paralelos y Horarios invalidadas.");
   }
 
@@ -145,7 +159,7 @@ class InscripcionService extends _$InscripcionService {
       _invalidateExternalCaches(paralelo.idMateria);
       return "Materia retirada exitosamente.";
     }
-    
+
     // --- ACCIÓN 2: CANCELAR SOLICITUD ---
     if (paralelo.estadoEstudiante == EstadoInscripcionParalelo.solicitado) {
       debugPrint("LOG: Intentando retirar solicitud...");
@@ -157,12 +171,14 @@ class InscripcionService extends _$InscripcionService {
 
     // --- ACCIÓN 3: INSCRIBIR O SOLICITAR ---
     if (paralelo.estadoEstudiante == EstadoInscripcionParalelo.ninguno) {
-      
       final (idSemestreActual, _) = await _getSemestreActualId();
 
       // VALIDACIÓN 1: DUPLICADO DE MATERIA
       final bool yaInscrito = await registroRepo.isEnrolledInSubject(
-          idEstudiante, paralelo.idMateria, idSemestreActual);
+        idEstudiante,
+        paralelo.idMateria,
+        idSemestreActual,
+      );
       if (yaInscrito) {
         debugPrint("LOG: ❌ ERROR: Ya inscrito en esta materia.");
         return "Error. Ya estás inscrito en esta materia en otro paralelo. Retira la materia original para inscribirte en este.";
@@ -170,17 +186,24 @@ class InscripcionService extends _$InscripcionService {
 
       // VALIDACIÓN 2: REQUISITOS
       if (paralelo.cumpleRequisitos) {
-        
         // VALIDACIÓN 3: CHOQUE DE HORARIO
         final bool hayChoque = await registroRepo.checkScheduleConflict(
-            idEstudiante, idParalelo, idSemestreActual);
+          idEstudiante,
+          idParalelo,
+          idSemestreActual,
+        );
 
         if (hayChoque) {
           // HAY CHOQUE -> FORZAR SOLICITUD
-          debugPrint("LOG: Cumple requisitos, pero hay CHOQUE. Forzando solicitud...");
+          debugPrint(
+            "LOG: Cumple requisitos, pero hay CHOQUE. Forzando solicitud...",
+          );
           try {
             await registroRepo.enviarSolicitud(
-                idEstudiante, idParalelo, "Choque de horario");
+              idEstudiante,
+              idParalelo,
+              "Choque de horario",
+            );
             debugPrint("LOG: ✅ ÉXITO: Solicitud enviada (por choque)");
             _invalidateExternalCaches(paralelo.idMateria);
             return "No puedes inscribirte directamente por choque de horario. Se envió una solicitud.";
@@ -190,7 +213,9 @@ class InscripcionService extends _$InscripcionService {
           }
         } else {
           // NO HAY CHOQUE -> INSCRIBIR DIRECTO
-          debugPrint("LOG: Cumple requisitos y no hay choque. Intentando inscribir...");
+          debugPrint(
+            "LOG: Cumple requisitos y no hay choque. Intentando inscribir...",
+          );
           try {
             await registroRepo.inscribirEstudiante(idEstudiante, idParalelo);
             debugPrint("LOG: ✅ ÉXITO: Inscripción directa");
@@ -206,7 +231,10 @@ class InscripcionService extends _$InscripcionService {
         debugPrint("LOG: No cumple requisitos. Intentando enviar solicitud...");
         try {
           await registroRepo.enviarSolicitud(
-              idEstudiante, idParalelo, "No cumple requisitos");
+            idEstudiante,
+            idParalelo,
+            "No cumple requisitos",
+          );
           debugPrint("LOG: ✅ ÉXITO: Solicitud enviada (por requisitos)");
           _invalidateExternalCaches(paralelo.idMateria);
           return "No cumples los requisitos. Se envió una solicitud de inscripción.";
@@ -216,7 +244,7 @@ class InscripcionService extends _$InscripcionService {
         }
       }
     }
-    
+
     return "No se puede realizar la acción.";
   }
 }

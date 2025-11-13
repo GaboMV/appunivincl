@@ -83,7 +83,10 @@ class RegistroRepository {
 
   /// Revisa si el estudiante ya está inscrito en otra paralelo DE LA MISMA MATERIA
   Future<bool> isEnrolledInSubject(
-      int idEstudiante, int idMateria, int idSemestreActual) async {
+    int idEstudiante,
+    int idMateria,
+    int idSemestreActual,
+  ) async {
     final sql = '''
       SELECT I.id_inscripcion
       FROM Inscripciones AS I
@@ -94,14 +97,20 @@ class RegistroRepository {
         AND I.estado = 'Cursando'
       LIMIT 1;
     ''';
-    final result = await _db.rawQuery(sql, [idEstudiante, idMateria, idSemestreActual]);
+    final result = await _db.rawQuery(sql, [
+      idEstudiante,
+      idMateria,
+      idSemestreActual,
+    ]);
     return result.isNotEmpty;
   }
 
   /// Revisa si hay choque de horario
   Future<bool> checkScheduleConflict(
-      int idEstudiante, int idParaleloNuevo, int idSemestreActual) async {
-    
+    int idEstudiante,
+    int idParaleloNuevo,
+    int idSemestreActual,
+  ) async {
     // 1. Obtener los IDs de horario del NUEVO paralelo
     final nuevosHorariosMap = await _db.query(
       'Paralelo_Horario',
@@ -109,9 +118,11 @@ class RegistroRepository {
       where: 'id_paralelo = ?',
       whereArgs: [idParaleloNuevo],
     );
-    final nuevosHorariosIds = nuevosHorariosMap.map((h) => h['id_horario'] as int).toSet();
+    final nuevosHorariosIds =
+        nuevosHorariosMap.map((h) => h['id_horario'] as int).toSet();
 
-    if (nuevosHorariosIds.isEmpty) return false; // No tiene horario, no puede chocar
+    if (nuevosHorariosIds.isEmpty)
+      return false; // No tiene horario, no puede chocar
 
     // 2. Obtener los IDs de horario de TODAS las materias YA INSCRITAS
     final sqlInscritos = '''
@@ -123,10 +134,15 @@ class RegistroRepository {
         AND PS.id_semestre = ? 
         AND I.estado = 'Cursando';
     ''';
-    final inscritosHorariosMap = await _db.rawQuery(sqlInscritos, [idEstudiante, idSemestreActual]);
-    final inscritosHorariosIds = inscritosHorariosMap.map((h) => h['id_horario'] as int).toSet();
+    final inscritosHorariosMap = await _db.rawQuery(sqlInscritos, [
+      idEstudiante,
+      idSemestreActual,
+    ]);
+    final inscritosHorariosIds =
+        inscritosHorariosMap.map((h) => h['id_horario'] as int).toSet();
 
-    if (inscritosHorariosIds.isEmpty) return false; // No tiene otras materias, no puede chocar
+    if (inscritosHorariosIds.isEmpty)
+      return false; // No tiene otras materias, no puede chocar
 
     // 3. Comparar los dos sets
     final intersection = nuevosHorariosIds.intersection(inscritosHorariosIds);
@@ -162,10 +178,10 @@ class RegistroRepository {
           S.nombre = ? AND
           I.estado = 'Cursando';
     ''';
-    final List<Map<String, dynamic>> result = await _db.rawQuery(
-      sql,
-      [idEstudiante, nombreSemestre],
-    );
+    final List<Map<String, dynamic>> result = await _db.rawQuery(sql, [
+      idEstudiante,
+      nombreSemestre,
+    ]);
     return result;
   }
 
@@ -184,12 +200,16 @@ class RegistroRepository {
       WHERE I.id_estudiante = ?
       ORDER BY S.nombre DESC; 
     ''';
-    final List<Map<String, dynamic>> maps = await _db.rawQuery(sql, [idEstudiante]);
+    final List<Map<String, dynamic>> maps = await _db.rawQuery(sql, [
+      idEstudiante,
+    ]);
     return maps.map((map) => Semestre.fromMap(map)).toList();
   }
 
   Future<List<HistorialMateria>> getHistorialPorSemestre(
-      int idEstudiante, int idSemestre) async {
+    int idEstudiante,
+    int idSemestre,
+  ) async {
     // ... (sin cambios)
     const sql = '''
       SELECT 
@@ -200,7 +220,10 @@ class RegistroRepository {
       JOIN Materias AS M ON PS.id_materia = M.id_materia
       WHERE I.id_estudiante = ? AND PS.id_semestre = ?;
     ''';
-    final List<Map<String, dynamic>> maps = await _db.rawQuery(sql, [idEstudiante, idSemestre]);
+    final List<Map<String, dynamic>> maps = await _db.rawQuery(sql, [
+      idEstudiante,
+      idSemestre,
+    ]);
     return maps.map((map) => HistorialMateria.fromMap(map)).toList();
   }
 

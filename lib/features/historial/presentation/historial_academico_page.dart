@@ -213,7 +213,9 @@ class _HistorialAcademicoPageState
     final asyncSemestres = ref.watch(historialSemestresProvider);
 
     final int? idSemestreSeleccionado =
-        _listaSemestres.isNotEmpty ? _listaSemestres[_idxSemestre].id_semestre : null;
+        _listaSemestres.isNotEmpty
+            ? _listaSemestres[_idxSemestre].id_semestre
+            : null;
 
     final asyncMaterias =
         (idSemestreSeleccionado != null && _semestreConfirmado)

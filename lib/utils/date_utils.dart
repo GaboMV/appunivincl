@@ -45,16 +45,19 @@ String formatarHorariosParaTTS(String horariosRaw) {
   }
   try {
     // 1. Separa "Lunes 08:00-10:00" y "Miércoles 08:00-10:00"
-    return horariosRaw.split(', ').map((bloque) {
-      // 2. Separa "Lunes" y "08:00-10:00"
-      final parts = bloque.split(' ');
-      final dia = parts[0];
-      // 3. Separa "08:00" y "10:00"
-      final horas = parts[1].split('-');
-      final inicio = formatarHoraParaTTS(horas[0]); // "8 de la mañana"
-      final fin = formatarHoraParaTTS(horas[1]); // "10 de la mañana"
-      return "$dia de $inicio a $fin";
-    }).join(', ');
+    return horariosRaw
+        .split(', ')
+        .map((bloque) {
+          // 2. Separa "Lunes" y "08:00-10:00"
+          final parts = bloque.split(' ');
+          final dia = parts[0];
+          // 3. Separa "08:00" y "10:00"
+          final horas = parts[1].split('-');
+          final inicio = formatarHoraParaTTS(horas[0]); // "8 de la mañana"
+          final fin = formatarHoraParaTTS(horas[1]); // "10 de la mañana"
+          return "$dia de $inicio a $fin";
+        })
+        .join(', ');
   } catch (e) {
     return horariosRaw; // Devuelve el original si falla
   }
@@ -104,7 +107,7 @@ String limpiarTextoParaTTS(String texto) {
       .replaceAll(' I', ' 1')
       // Guiones
       .replaceAll('-', ' ');
-  
+
   // Reemplaza "N/A" (del modelo de historial) por "sin nota"
   textoLimpio = textoLimpio.replaceAll('N/A', 'sin nota');
 
@@ -113,10 +116,13 @@ String limpiarTextoParaTTS(String texto) {
 
 /// Normaliza la entrada de voz para que coincida con la BD.
 String normalizarQueryBusqueda(String query) {
-  final queryCapitalized = query.split(' ').map((word) {
-    if (word.isEmpty) return '';
-    return word[0].toUpperCase() + word.substring(1).toLowerCase();
-  }).join(' ');
+  final queryCapitalized = query
+      .split(' ')
+      .map((word) {
+        if (word.isEmpty) return '';
+        return word[0].toUpperCase() + word.substring(1).toLowerCase();
+      })
+      .join(' ');
 
   return queryCapitalized
       .replaceAll(' 4', ' IV')

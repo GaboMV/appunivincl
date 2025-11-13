@@ -64,9 +64,11 @@ class _MenuPrincipalAccesibleState
         break;
       case 1:
         accion += "Inscripciones y Solicitudes.";
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => const InscripcionPage(), // Llama a la nueva página
-        ));
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const InscripcionPage(), // Llama a la nueva página
+          ),
+        );
         break;
       case 2:
         accion += "Historial Académico.";

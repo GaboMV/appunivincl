@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // 🚨 1. IMPORTAR UTILS
-import 'package:appuniv/utils/date_utils.dart'; 
+import 'package:appuniv/utils/date_utils.dart';
 
 class HorariosPageAccesible extends ConsumerStatefulWidget {
   const HorariosPageAccesible({super.key});
@@ -15,12 +15,17 @@ class HorariosPageAccesible extends ConsumerStatefulWidget {
       _HorariosPageAccesibleState();
 }
 
-class _HorariosPageAccesibleState
-    extends ConsumerState<HorariosPageAccesible> {
+class _HorariosPageAccesibleState extends ConsumerState<HorariosPageAccesible> {
   final tts = TtsService();
   int _campoActual = 0;
   final List<String> _dias = [
-    'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo',
+    'Lunes',
+    'Martes',
+    'Miércoles',
+    'Jueves',
+    'Viernes',
+    'Sábado',
+    'Domingo',
   ];
 
   @override
@@ -28,11 +33,11 @@ class _HorariosPageAccesibleState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // 🚨 2. FIX SEMESTER NAME (usa la lógica de utils)
-      final String nombreSemestre = getNombreSemestreActual(); 
+      final String nombreSemestre = getNombreSemestreActual();
       final String nombreLimpio = limpiarTextoParaTTS(nombreSemestre);
 
       tts.hablar(
-        "Mis horarios del semestre actual. Semestre actual: $nombreLimpio. Selecciona un día."
+        "Mis horarios del semestre actual. Semestre actual: $nombreLimpio. Selecciona un día.",
       );
     });
   }
@@ -46,7 +51,7 @@ class _HorariosPageAccesibleState
     // El provider (horarioProcesadoProvider) ya formateó la hora y agrupó las clases
     final lectura =
         horarioData[diaSeleccionado] ?? "No se encontró horario para este día.";
-    
+
     // 🚨 3. Limpiamos la lectura (por si hay numerales como "Cálculo II")
     tts.hablar("$diaSeleccionado: ${limpiarTextoParaTTS(lectura)}");
   }
@@ -60,7 +65,7 @@ class _HorariosPageAccesibleState
       appBar: AppBar(
         title: const Text("Mi Horario (Semestre Actual)"),
         backgroundColor: Colors.grey[900],
-        automaticallyImplyLeading: false, 
+        automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
@@ -79,26 +84,31 @@ class _HorariosPageAccesibleState
                   },
                 );
               },
-              loading: () => const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(color: Colors.greenAccent),
-                    SizedBox(height: 16),
-                    Text("Cargando horario...", style: TextStyle(color: Colors.white)),
-                  ],
-                ),
-              ),
-              error: (e, s) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Text(
-                    "Error al cargar el horario: ${e.toString()}",
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
+              loading:
+                  () => const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(color: Colors.greenAccent),
+                        SizedBox(height: 16),
+                        Text(
+                          "Cargando horario...",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ),
+              error:
+                  (e, s) => Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text(
+                        "Error al cargar el horario: ${e.toString()}",
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
             ),
           ),
           _buildBotonesAccesibles(horarioAsync),
@@ -116,13 +126,16 @@ class _HorariosPageAccesibleState
     // 🚨 4. FIX: Mejorar la UI para que muestre un resumen útil
     String resumenUI;
     if (resumen == "Sin clases programadas.") {
-        resumenUI = "Libre";
-    } else if (resumen.contains("Luego...")) { // Detecta si hay múltiples clases
-        resumenUI = "Varias clases";
+      resumenUI = "Libre";
+    } else if (resumen.contains("Luego...")) {
+      // Detecta si hay múltiples clases
+      resumenUI = "Varias clases";
     } else {
-        // Intenta mostrar el nombre de la única materia
-        resumenUI = resumen.split(' ').firstWhere((s) => s.isNotEmpty, orElse: () => "Ver detalles");
-        if (resumenUI.length > 10) resumenUI = "${resumenUI.substring(0, 10)}...";
+      // Intenta mostrar el nombre de la única materia
+      resumenUI = resumen
+          .split(' ')
+          .firstWhere((s) => s.isNotEmpty, orElse: () => "Ver detalles");
+      if (resumenUI.length > 10) resumenUI = "${resumenUI.substring(0, 10)}...";
     }
 
     return GestureDetector(
@@ -136,9 +149,10 @@ class _HorariosPageAccesibleState
         decoration: BoxDecoration(
           color: seleccionado ? Colors.teal[700] : Colors.grey[900],
           borderRadius: BorderRadius.circular(16),
-          border: seleccionado
-              ? Border.all(color: Colors.tealAccent, width: 2)
-              : null,
+          border:
+              seleccionado
+                  ? Border.all(color: Colors.tealAccent, width: 2)
+                  : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -193,7 +207,7 @@ class _HorariosPageAccesibleState
             child: _botonGrande("Volver", Icons.exit_to_app, () {
               tts.hablar("Volviendo al menú principal.");
               Navigator.of(context).pop();
-            }), 
+            }),
           ),
         ],
       ),
@@ -215,11 +229,18 @@ class _HorariosPageAccesibleState
       onPressed: habilitado ? accion : null,
       child: Column(
         children: [
-          Icon(icono, size: 32, color: Colors.white.withOpacity(habilitado ? 1.0 : 0.5)),
+          Icon(
+            icono,
+            size: 32,
+            color: Colors.white.withOpacity(habilitado ? 1.0 : 0.5),
+          ),
           const SizedBox(height: 8),
           Text(
             texto,
-            style: TextStyle(fontSize: 18, color: Colors.white.withOpacity(habilitado ? 1.0 : 0.5)),
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.white.withOpacity(habilitado ? 1.0 : 0.5),
+            ),
           ),
         ],
       ),

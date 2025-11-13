@@ -58,18 +58,22 @@ class MateriaRepository {
       WHERE PH.id_paralelo = ?
       ORDER BY H.dia; 
     ''';
-    final List<Map<String, dynamic>> maps = await _db.rawQuery(sql, [idParalelo]);
+    final List<Map<String, dynamic>> maps = await _db.rawQuery(sql, [
+      idParalelo,
+    ]);
     if (maps.isEmpty) {
       return ""; // Devuelve vacío, no "Horario no definido"
     }
-    
+
     // Devuelve el formato "Lunes 08:00-10:00, Miércoles 08:00-10:00"
-    return maps.map((h) {
-      final dia = h['dia'].toString(); // "Lunes"
-      final inicio = h['hora_inicio'] as String; // "08:00"
-      final fin = h['hora_fin'] as String; // "10:00"
-      return "$dia $inicio-$fin";
-    }).join(', ');
+    return maps
+        .map((h) {
+          final dia = h['dia'].toString(); // "Lunes"
+          final inicio = h['hora_inicio'] as String; // "08:00"
+          final fin = h['hora_fin'] as String; // "10:00"
+          return "$dia $inicio-$fin";
+        })
+        .join(', ');
   }
 
   /// 6. OBTENER REQUISITOS COMO STRING
@@ -80,7 +84,9 @@ class MateriaRepository {
       JOIN Materias AS M ON R.id_materia_previa = M.id_materia
       WHERE R.id_materia_cursar = ?;
     ''';
-    final List<Map<String, dynamic>> maps = await _db.rawQuery(sql, [idMateria]);
+    final List<Map<String, dynamic>> maps = await _db.rawQuery(sql, [
+      idMateria,
+    ]);
     if (maps.isEmpty) {
       return "";
     }
@@ -114,11 +120,13 @@ class MateriaRepository {
         PS.id_materia = ? AND PS.id_semestre = ?;
     ''';
 
-    final List<Map<String, dynamic>> maps = await _db.rawQuery(
-      sql,
-      [idEstudiante, idEstudiante, idMateria, idSemestreActual],
-    );
-    
+    final List<Map<String, dynamic>> maps = await _db.rawQuery(sql, [
+      idEstudiante,
+      idEstudiante,
+      idMateria,
+      idSemestreActual,
+    ]);
+
     return maps.map((map) => ParaleloSimple.fromMap(map)).toList();
   }
 }

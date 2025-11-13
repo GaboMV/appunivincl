@@ -75,7 +75,10 @@ class Aula {
   final String nombre;
   Aula({required this.id_aula, required this.nombre});
   factory Aula.fromMap(Map<String, dynamic> map) {
-    return Aula(id_aula: map['id_aula'] as int, nombre: map['nombre'] as String);
+    return Aula(
+      id_aula: map['id_aula'] as int,
+      nombre: map['nombre'] as String,
+    );
   }
 }
 
@@ -384,8 +387,10 @@ class ParaleloDetalleCompleto {
 
   String get textoBoton {
     switch (estadoEstudiante) {
-      case EstadoInscripcionParalelo.inscrito: return "Retirar Materia";
-      case EstadoInscripcionParalelo.solicitado: return "Cancelar Solicitud";
+      case EstadoInscripcionParalelo.inscrito:
+        return "Retirar Materia";
+      case EstadoInscripcionParalelo.solicitado:
+        return "Cancelar Solicitud";
       case EstadoInscripcionParalelo.ninguno:
         return cumpleRequisitos ? "Inscribirse" : "Solicitar (Req. P.)";
     }
@@ -404,17 +409,20 @@ class ParaleloDetalleCompleto {
       texto += "No tiene requisitos. ";
     } else {
       texto += "$requisitos. ";
-      texto += cumpleRequisitos
-          ? "Usted CUMPLE los requisitos. "
-          : "Usted NO CUMPLE los requisitos. ";
+      texto +=
+          cumpleRequisitos
+              ? "Usted CUMPLE los requisitos. "
+              : "Usted NO CUMPLE los requisitos. ";
     }
 
     switch (estadoEstudiante) {
       case EstadoInscripcionParalelo.inscrito:
-        texto += "Estado: Ya estás inscrito. Presiona OK para retirar la materia.";
+        texto +=
+            "Estado: Ya estás inscrito. Presiona OK para retirar la materia.";
         break;
       case EstadoInscripcionParalelo.solicitado:
-        texto += "Estado: Solicitud enviada. Presiona OK para cancelar la solicitud.";
+        texto +=
+            "Estado: Solicitud enviada. Presiona OK para cancelar la solicitud.";
         break;
       case EstadoInscripcionParalelo.ninguno:
         if (cumpleRequisitos) {

@@ -38,5 +38,8 @@ Future<List<HistorialMateria>> historialMaterias(
   }
 
   final registroRepo = ref.watch(registroRepositoryProvider);
-  return registroRepo.getHistorialPorSemestre(estudiante.id_estudiante, idSemestre);
+  return registroRepo.getHistorialPorSemestre(
+    estudiante.id_estudiante,
+    idSemestre,
+  );
 }
