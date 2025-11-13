@@ -42,3 +42,17 @@ class AuthNormalizer {
     return input.removeAccents().removeAllSpaces();
   }
 }
+String normalizarQueryBusqueda(String query) {
+  // Pone la primera letra de cada palabra en mayúscula
+  final queryCapitalized = query.split(' ').map((word) {
+    if (word.isEmpty) return '';
+    return word[0].toUpperCase() + word.substring(1).toLowerCase();
+  }).join(' ');
+
+  // Reemplaza números por numerales romanos
+  return queryCapitalized
+      .replaceAll(' 4', ' IV')
+      .replaceAll(' 3', ' III')
+      .replaceAll(' 2', ' II')
+      .replaceAll(' 1', ' I');
+}

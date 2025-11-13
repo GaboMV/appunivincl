@@ -21,7 +21,7 @@ Future<List<Semestre>> historialSemestres(HistorialSemestresRef ref) {
   }
 
   final registroRepo = ref.watch(registroRepositoryProvider);
-  return registroRepo.getSemestresInscritos(estudiante.id);
+  return registroRepo.getSemestresInscritos(estudiante.id_estudiante);
 }
 
 /// Provider que obtiene las materias de UN semestre específico
@@ -38,5 +38,5 @@ Future<List<HistorialMateria>> historialMaterias(
   }
 
   final registroRepo = ref.watch(registroRepositoryProvider);
-  return registroRepo.getHistorialPorSemestre(estudiante.id, idSemestre);
+  return registroRepo.getHistorialPorSemestre(estudiante.id_estudiante, idSemestre);
 }

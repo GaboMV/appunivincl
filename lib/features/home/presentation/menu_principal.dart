@@ -2,6 +2,7 @@
 
 import 'package:appuniv/features/historial/presentation/historial_academico_page.dart';
 import 'package:appuniv/features/horarios/presentation/horarios_page.dart';
+import 'package:appuniv/features/inscripciones/presentation/inscripcion_page.dart';
 import 'package:appuniv/features/login/presentation/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,8 +63,10 @@ class _MenuPrincipalAccesibleState
         );
         break;
       case 1:
-        accion += "Inscripciones.";
-        // Navegar a InscripcionesScreen
+        accion += "Inscripciones y Solicitudes.";
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => const InscripcionPage(), // Llama a la nueva página
+        ));
         break;
       case 2:
         accion += "Historial Académico.";

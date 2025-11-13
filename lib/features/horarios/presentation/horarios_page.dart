@@ -4,8 +4,8 @@ import 'package:appuniv/features/horarios/providers/horarios_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// 🚨 1. IMPORTAR EL UTIlL DE FECHAS
-import 'package:appuniv/utils/date_utils.dart';
+// 🚨 1. IMPORTAR UTILS
+import 'package:appuniv/utils/date_utils.dart'; 
 
 class HorariosPageAccesible extends ConsumerStatefulWidget {
   const HorariosPageAccesible({super.key});
@@ -15,40 +15,24 @@ class HorariosPageAccesible extends ConsumerStatefulWidget {
       _HorariosPageAccesibleState();
 }
 
-class _HorariosPageAccesibleState extends ConsumerState<HorariosPageAccesible> {
+class _HorariosPageAccesibleState
+    extends ConsumerState<HorariosPageAccesible> {
   final tts = TtsService();
   int _campoActual = 0;
   final List<String> _dias = [
-    'Lunes',
-    'Martes',
-    'Miércoles',
-    'Jueves',
-    'Viernes',
-    'Sábado',
-    'Domingo',
+    'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo',
   ];
-
-  // 🚨 2. AÑADIR LA FUNCIÓN DE LIMPIEZA (para evitar "menos")
-  /// Limpia el nombre del semestre para que el TTS lo lea bien.
-  String _limpiarNombreSemestre(String nombre) {
-    // Reemplaza "2025-4" por "2025 4" para que no diga "menos"
-    return nombre.replaceAll('-', ' ');
-  }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // 🚨 3. LÓGICA DE BIENVENIDA ACTUALIZADA
+      // 🚨 2. FIX SEMESTER NAME (usa la lógica de utils)
+      final String nombreSemestre = getNombreSemestreActual(); 
+      final String nombreLimpio = limpiarTextoParaTTS(nombreSemestre);
 
-      // Obtenemos el nombre del semestre actual (ej: "2025-4 Semestre 2")
-      final String nombreSemestre = getNombreSemestreActual();
-      // Lo limpiamos para el TTS (ej: "2025 4 Semestre 2")
-      final String nombreLimpio = _limpiarNombreSemestre(nombreSemestre);
-
-      // Hablamos el nuevo mensaje
       tts.hablar(
-        "Mis horarios del semestre actual. Semestre actual: $nombreLimpio. Selecciona un día.",
+        "Mis horarios del semestre actual. Semestre actual: $nombreLimpio. Selecciona un día."
       );
     });
   }
@@ -59,10 +43,12 @@ class _HorariosPageAccesibleState extends ConsumerState<HorariosPageAccesible> {
 
   void _ejecutarAccionOk(Map<String, String> horarioData) {
     final diaSeleccionado = _dias[_campoActual];
+    // El provider (horarioProcesadoProvider) ya formateó la hora y agrupó las clases
     final lectura =
         horarioData[diaSeleccionado] ?? "No se encontró horario para este día.";
-
-    tts.hablar("$diaSeleccionado: $lectura");
+    
+    // 🚨 3. Limpiamos la lectura (por si hay numerales como "Cálculo II")
+    tts.hablar("$diaSeleccionado: ${limpiarTextoParaTTS(lectura)}");
   }
 
   @override
@@ -74,13 +60,12 @@ class _HorariosPageAccesibleState extends ConsumerState<HorariosPageAccesible> {
       appBar: AppBar(
         title: const Text("Mi Horario (Semestre Actual)"),
         backgroundColor: Colors.grey[900],
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: false, 
       ),
       body: Column(
         children: [
           Expanded(
             child: horarioAsync.when(
-              // ✅ Datos Cargados
               data: (horarioData) {
                 return ListView.builder(
                   itemCount: _dias.length,
@@ -94,43 +79,33 @@ class _HorariosPageAccesibleState extends ConsumerState<HorariosPageAccesible> {
                   },
                 );
               },
-              // ⏳ Cargando
-              loading:
-                  () => const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(color: Colors.greenAccent),
-                        SizedBox(height: 16),
-                        Text(
-                          "Cargando horario...",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
-                    ),
+              loading: () => const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: Colors.greenAccent),
+                    SizedBox(height: 16),
+                    Text("Cargando horario...", style: TextStyle(color: Colors.white)),
+                  ],
+                ),
+              ),
+              error: (e, s) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Text(
+                    "Error al cargar el horario: ${e.toString()}",
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
                   ),
-              // ❌ Error
-              error:
-                  (e, s) => Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Text(
-                        "Error al cargar el horario: ${e.toString()}",
-                        style: const TextStyle(color: Colors.red),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
+                ),
+              ),
             ),
           ),
-          // --- Panel de Navegación ---
           _buildBotonesAccesibles(horarioAsync),
         ],
       ),
     );
   }
-
-  // --- Widgets de UI ---
 
   Widget _buildDiaItem(
     String dia,
@@ -138,8 +113,17 @@ class _HorariosPageAccesibleState extends ConsumerState<HorariosPageAccesible> {
     bool seleccionado,
     int index,
   ) {
-    String resumenUI =
-        (resumen == "Sin clases programadas.") ? "Libre" : "Ver detalles...";
+    // 🚨 4. FIX: Mejorar la UI para que muestre un resumen útil
+    String resumenUI;
+    if (resumen == "Sin clases programadas.") {
+        resumenUI = "Libre";
+    } else if (resumen.contains("Luego...")) { // Detecta si hay múltiples clases
+        resumenUI = "Varias clases";
+    } else {
+        // Intenta mostrar el nombre de la única materia
+        resumenUI = resumen.split(' ').firstWhere((s) => s.isNotEmpty, orElse: () => "Ver detalles");
+        if (resumenUI.length > 10) resumenUI = "${resumenUI.substring(0, 10)}...";
+    }
 
     return GestureDetector(
       onTap: () {
@@ -152,10 +136,9 @@ class _HorariosPageAccesibleState extends ConsumerState<HorariosPageAccesible> {
         decoration: BoxDecoration(
           color: seleccionado ? Colors.teal[700] : Colors.grey[900],
           borderRadius: BorderRadius.circular(16),
-          border:
-              seleccionado
-                  ? Border.all(color: Colors.tealAccent, width: 2)
-                  : null,
+          border: seleccionado
+              ? Border.all(color: Colors.tealAccent, width: 2)
+              : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -165,7 +148,7 @@ class _HorariosPageAccesibleState extends ConsumerState<HorariosPageAccesible> {
               style: const TextStyle(color: Colors.white, fontSize: 24),
             ),
             Text(
-              resumenUI,
+              resumenUI, // Muestra el resumen mejorado
               style: TextStyle(color: Colors.grey[400], fontSize: 18),
             ),
           ],
@@ -210,7 +193,7 @@ class _HorariosPageAccesibleState extends ConsumerState<HorariosPageAccesible> {
             child: _botonGrande("Volver", Icons.exit_to_app, () {
               tts.hablar("Volviendo al menú principal.");
               Navigator.of(context).pop();
-            }),
+            }), 
           ),
         ],
       ),
@@ -232,18 +215,11 @@ class _HorariosPageAccesibleState extends ConsumerState<HorariosPageAccesible> {
       onPressed: habilitado ? accion : null,
       child: Column(
         children: [
-          Icon(
-            icono,
-            size: 32,
-            color: Colors.white.withOpacity(habilitado ? 1.0 : 0.5),
-          ),
+          Icon(icono, size: 32, color: Colors.white.withOpacity(habilitado ? 1.0 : 0.5)),
           const SizedBox(height: 8),
           Text(
             texto,
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.white.withOpacity(habilitado ? 1.0 : 0.5),
-            ),
+            style: TextStyle(fontSize: 18, color: Colors.white.withOpacity(habilitado ? 1.0 : 0.5)),
           ),
         ],
       ),
