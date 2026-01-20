@@ -6,7 +6,7 @@ part of 'inscripcion_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$facultadesHash() => r'a3a678c32a729e7c4fd358b2bf60ee4847959c6a';
+String _$facultadesHash() => r'd5488df448cd1ba953d3e19af802d2478f5f2ab3';
 
 /// See also [facultades].
 @ProviderFor(facultades)
@@ -23,7 +23,7 @@ final facultadesProvider = FutureProvider<List<Facultad>>.internal(
 // ignore: unused_element
 typedef FacultadesRef = FutureProviderRef<List<Facultad>>;
 String _$materiasPorFacultadHash() =>
-    r'2f8510cbd4495c3a6ae41407e37770f5768a4354';
+    r'fc35a0f08967a8326a7f3578262fae35d02cd89e';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -167,7 +167,7 @@ class _MateriasPorFacultadProviderElement
 }
 
 String _$materiasPorBusquedaHash() =>
-    r'33c0ef266765e894a99a6a664d3cfa561b0c946b';
+    r'c324fb113ba22cd23122f57055ab8775e91d055c';
 
 /// See also [materiasPorBusqueda].
 @ProviderFor(materiasPorBusqueda)
@@ -288,7 +288,7 @@ class _MateriasPorBusquedaProviderElement
   String get query => (origin as MateriasPorBusquedaProvider).query;
 }
 
-String _$paralelosMateriaHash() => r'e3dd71c3c4568520cc982e324935c3396bbc69ae';
+String _$paralelosMateriaHash() => r'9f3d20cdd28204b056a61ff6897107c6fbebd68d';
 
 /// See also [paralelosMateria].
 @ProviderFor(paralelosMateria)
@@ -415,7 +415,7 @@ class _ParalelosMateriaProviderElement
 }
 
 String _$inscripcionServiceHash() =>
-    r'fa54d93c55b8f9b29aea2060a30d2e5e7391a3ae';
+    r'be0e5004d08320f66f2e48b113e0f001d8c0bef8';
 
 /// See also [InscripcionService].
 @ProviderFor(InscripcionService)

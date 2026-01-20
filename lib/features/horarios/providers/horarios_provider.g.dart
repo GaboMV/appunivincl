@@ -6,7 +6,7 @@ part of 'horarios_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$horarioEstudianteHash() => r'57cd3f6e63f066e490f998d84df577e60467d1dd';
+String _$horarioEstudianteHash() => r'6f577121d5bd6fa2bd622642c2d90af5e9068172';
 
 /// See also [horarioEstudiante].
 @ProviderFor(horarioEstudiante)
@@ -25,7 +25,7 @@ final horarioEstudianteProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef HorarioEstudianteRef = FutureProviderRef<List<Map<String, dynamic>>>;
-String _$horarioProcesadoHash() => r'25a417ba9184e21e81caf0306a9b32af4248bae0';
+String _$horarioProcesadoHash() => r'2c8aa45b5a961612cb26f1cc9fd4f5a313356781';
 
 /// See also [horarioProcesado].
 @ProviderFor(horarioProcesado)

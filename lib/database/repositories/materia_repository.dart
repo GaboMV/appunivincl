@@ -127,6 +127,8 @@ class MateriaRepository {
       idSemestreActual,
     ]);
 
-    return maps.map((map) => ParaleloSimple.fromMap(map)).toList();
+    return maps.map((map) {
+      return ParaleloSimple.fromMap(map,"qwe");
+    }).toList();
   }
 }

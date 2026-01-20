@@ -5,13 +5,11 @@ import 'package:appuniv/features/historial/providers/historial_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:appuniv/core/tts_service.dart';
 
-import 'package:appuniv/features/historial/providers/historial_providers.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:appuniv/utils/date_utils.dart';
+// lib/features/historial/pages/historial_academico_page.dart
+
 
 enum _ModoSeleccion { focoEnSemestre, editandoSemestre, focoEnMateria }
 
@@ -36,9 +34,6 @@ class _HistorialAcademicoPageState
   List<Semestre> _listaSemestres = [];
   List<HistorialMateria> _listaMaterias = [];
 
-  // 🚨 2. FUNCIONES DE LIMPIEZA LOCALES ELIMINADAS
-  // (Ya no se necesitan _limpiarNombreSemestre ni _limpiarNumerales)
-
   @override
   void initState() {
     super.initState();
@@ -59,7 +54,6 @@ class _HistorialAcademicoPageState
       }
       _listaSemestres = semestres;
 
-      // 🚨 3. USAR LA FUNCIÓN DE UTILS
       final nombreLimpio = limpiarTextoParaTTS(
         _listaSemestres[_idxSemestre].nombre,
       );
@@ -76,7 +70,6 @@ class _HistorialAcademicoPageState
     if (_modo == _ModoSeleccion.focoEnSemestre) {
       if (_listaSemestres.isEmpty) return;
 
-      // 🚨 3. USAR LA FUNCIÓN DE UTILS
       final nombreLimpio = limpiarTextoParaTTS(
         _listaSemestres[_idxSemestre].nombre,
       );
@@ -87,7 +80,6 @@ class _HistorialAcademicoPageState
     } else if (_modo == _ModoSeleccion.editandoSemestre) {
       if (_listaSemestres.isEmpty) return;
 
-      // 🚨 3. USAR LA FUNCIÓN DE UTILS
       final nombreLimpio = limpiarTextoParaTTS(
         _listaSemestres[_idxSemestre].nombre,
       );
@@ -96,7 +88,6 @@ class _HistorialAcademicoPageState
     } else {
       if (_listaMaterias.isEmpty) return;
 
-      // 🚨 3. USAR LA FUNCIÓN DE UTILS
       final nombreOriginal = _listaMaterias[_idxMateria].nombreMateria;
       final nombreLimpio = limpiarTextoParaTTS(nombreOriginal);
 
@@ -137,10 +128,7 @@ class _HistorialAcademicoPageState
           return;
         }
 
-        // 🚨 3. USAR LA FUNCIÓN DE UTILS
-        // El modelo da el texto "sucio"
         final stringOriginal = _listaMaterias[_idxMateria].lecturaTts;
-        // Lo limpiamos antes de hablar
         final stringLimpio = limpiarTextoParaTTS(stringOriginal);
 
         tts.hablar(stringLimpio);
@@ -160,7 +148,7 @@ class _HistorialAcademicoPageState
       setState(() {
         _idxSemestre =
             (_idxSemestre + direccionCorregida + _listaSemestres.length) %
-            _listaSemestres.length;
+                _listaSemestres.length;
         _idxMateria = 0;
         _semestreConfirmado = false;
         _haHabladoBienvenidaMaterias = false;
@@ -170,7 +158,7 @@ class _HistorialAcademicoPageState
       setState(() {
         _idxMateria =
             (_idxMateria + direccion + _listaMaterias.length) %
-            _listaMaterias.length;
+                _listaMaterias.length;
       });
     }
     _ttsCampoActual();
@@ -185,7 +173,6 @@ class _HistorialAcademicoPageState
           _haHabladoBienvenidaMaterias = false;
         });
 
-        // 🚨 3. USAR LA FUNCIÓN DE UTILS
         final nombreLimpio = limpiarTextoParaTTS(
           _listaSemestres[_idxSemestre].nombre,
         );
@@ -211,6 +198,7 @@ class _HistorialAcademicoPageState
   @override
   Widget build(BuildContext context) {
     final asyncSemestres = ref.watch(historialSemestresProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     final int? idSemestreSeleccionado =
         _listaSemestres.isNotEmpty
@@ -230,7 +218,6 @@ class _HistorialAcademicoPageState
           _haHabladoBienvenidaMaterias = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (materias.isNotEmpty) {
-              // 🚨 3. USAR LA FUNCIÓN DE UTILS
               final nombreLimpio = limpiarTextoParaTTS(
                 materias[_idxMateria].nombreMateria,
               );
@@ -246,10 +233,9 @@ class _HistorialAcademicoPageState
     }
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      // Fondo blanco automático
       appBar: AppBar(
         title: const Text("Historial Académico"),
-        backgroundColor: Colors.grey[900],
         automaticallyImplyLeading: false,
       ),
       body: Column(
@@ -257,22 +243,24 @@ class _HistorialAcademicoPageState
           asyncSemestres.when(
             data: (semestres) {
               if (semestres.isEmpty) {
-                return const Center(child: Text("No hay semestres."));
+                return Center(
+                    child: Text("No hay semestres.",
+                        style: TextStyle(color: colorScheme.onSurface, fontSize: 18)));
               }
               if (_listaSemestres.isEmpty) _listaSemestres = semestres;
               return _buildSemestreSelector(
                 _listaSemestres[_idxSemestre].nombre,
+                colorScheme,
               );
             },
             loading: () => const LinearProgressIndicator(),
-            error:
-                (e, s) => Text(
-                  "Error: $e",
-                  style: const TextStyle(color: Colors.red),
-                ),
+            error: (e, s) => Text(
+              "Error: $e",
+              style: TextStyle(color: colorScheme.error),
+            ),
           ),
-          Expanded(child: _buildAreaDeMaterias(asyncMaterias)),
-          _buildBotonesAccesibles(),
+          Expanded(child: _buildAreaDeMaterias(asyncMaterias, colorScheme)),
+          _buildBotonesAccesibles(colorScheme),
         ],
       ),
     );
@@ -280,14 +268,15 @@ class _HistorialAcademicoPageState
 
   Widget _buildAreaDeMaterias(
     AsyncValue<List<HistorialMateria>>? asyncMaterias,
+    ColorScheme colors,
   ) {
     if (!_semestreConfirmado) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(30.0),
+          padding: const EdgeInsets.all(30.0),
           child: Text(
             "Presione OK para cargar las materias del semestre seleccionado.",
-            style: TextStyle(fontSize: 18, color: Colors.white70),
+            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
         ),
@@ -299,36 +288,41 @@ class _HistorialAcademicoPageState
     return asyncMaterias.when(
       data: (materias) {
         if (materias.isEmpty) {
-          return const Center(
+          return Center(
             child: Text(
               "No hay materias para este semestre.",
-              style: TextStyle(fontSize: 18, color: Colors.white70),
+              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
             ),
           );
         }
-        return _buildListaMaterias(materias);
+        return _buildListaMaterias(materias, colors);
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error:
-          (e, s) =>
-              Text("Error: $e", style: const TextStyle(color: Colors.red)),
+      error: (e, s) =>
+          Text("Error: $e", style: TextStyle(color: colors.error)),
     );
   }
 
-  Widget _buildSemestreSelector(String nombreSemestre) {
+  Widget _buildSemestreSelector(String nombreSemestre, ColorScheme colors) {
     final bool focoEnWidget = _modo == _ModoSeleccion.focoEnSemestre;
     final bool editandoWidget = _modo == _ModoSeleccion.editandoSemestre;
-    Color borderColor = Colors.blue.shade900;
+    
+    Color borderColor = Colors.grey[300]!;
+    Color backgroundColor = Colors.grey[200]!;
+    
     if (focoEnWidget) {
-      borderColor = Colors.white;
+      borderColor = colors.primary;
+      backgroundColor = colors.primary.withOpacity(0.1);
     } else if (editandoWidget) {
-      borderColor = Colors.yellow;
+      borderColor = colors.secondary;
+      backgroundColor = colors.secondary.withOpacity(0.1);
     }
+    
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.blue.shade900,
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: borderColor, width: 3),
       ),
@@ -336,19 +330,27 @@ class _HistorialAcademicoPageState
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (editandoWidget)
-            const Icon(Icons.edit, color: Colors.yellow, size: 30)
+            Icon(Icons.edit, color: colors.secondary, size: 30)
           else
-            const Icon(Icons.school, size: 30, color: Colors.white),
+            Icon(Icons.school, size: 30, color: colors.primary),
           const SizedBox(width: 15),
-          Text(
-            nombreSemestre,
-            style: const TextStyle(color: Colors.white, fontSize: 24),
+        Expanded(
+            child: Text(
+              nombreSemestre,
+              style: TextStyle(
+                  color: colors.onSurface, // Negro
+                  fontSize: 24, 
+                  fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+            ),
           ),
           const SizedBox(width: 15),
           if (focoEnWidget)
-            const Icon(Icons.arrow_drop_down, color: Colors.white70)
+            Icon(Icons.arrow_drop_down, color: colors.primary)
           else if (editandoWidget)
-            const Icon(Icons.check_circle_outline, color: Colors.yellow)
+            Icon(Icons.check_circle_outline, color: colors.secondary)
           else
             const Icon(Icons.school, size: 30, color: Colors.transparent),
         ],
@@ -356,7 +358,7 @@ class _HistorialAcademicoPageState
     );
   }
 
-  Widget _buildListaMaterias(List<HistorialMateria> materias) {
+  Widget _buildListaMaterias(List<HistorialMateria> materias, ColorScheme colors) {
     return ListView.builder(
       itemCount: materias.length,
       itemBuilder: (context, index) {
@@ -367,24 +369,36 @@ class _HistorialAcademicoPageState
           materia.nombreMateria,
           materia.estadoCalculado,
           seleccionado,
+          colors,
         );
       },
     );
   }
 
-  Widget _buildBotonMateria(String materia, String estado, bool seleccionado) {
-    final Color colorEstado =
-        (estado == "Aprobado")
-            ? Colors.green
-            : (estado == "Reprobado" ? Colors.red : Colors.grey);
+  Widget _buildBotonMateria(String materia, String estado, bool seleccionado, ColorScheme colors) {
+    Color colorEstado;
+    Color colorFondoEstado;
+    
+    if (estado == "Aprobado") {
+        colorEstado = Colors.green[700]!;
+        colorFondoEstado = Colors.green[50]!;
+    } else if (estado == "Reprobado") {
+        colorEstado = colors.error;
+        colorFondoEstado = Colors.red[50]!;
+    } else {
+        colorEstado = Colors.grey[600]!;
+        colorFondoEstado = Colors.grey[200]!;
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 30),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: seleccionado ? Colors.teal.shade700 : Colors.teal.shade900,
+        // Azul claro si seleccionado, o el color de fondo del estado si no
+        color: seleccionado ? colors.primary.withOpacity(0.1) : colorFondoEstado,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: seleccionado ? Colors.white : Colors.transparent,
+          color: seleccionado ? colors.primary : Colors.transparent,
           width: 2,
         ),
       ),
@@ -405,22 +419,25 @@ class _HistorialAcademicoPageState
               children: [
                 Text(
                   materia,
-                  style: const TextStyle(color: Colors.white, fontSize: 22),
+                  style: TextStyle(
+                      color: colors.onSurface, // Negro
+                      fontSize: 22, 
+                      fontWeight: seleccionado ? FontWeight.bold : FontWeight.normal),
                 ),
                 Text(
                   estado,
-                  style: TextStyle(color: colorEstado, fontSize: 18),
+                  style: TextStyle(color: colorEstado, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
           ),
-          if (seleccionado) const Icon(Icons.volume_up, color: Colors.white70),
+          if (seleccionado) Icon(Icons.volume_up, color: colors.primary),
         ],
       ),
     );
   }
 
-  Widget _buildBotonesAccesibles() {
+  Widget _buildBotonesAccesibles(ColorScheme colors) {
     bool puedeNavegar = true;
     bool puedeOK = true;
     if (_modo == _ModoSeleccion.focoEnSemestre) {
@@ -439,26 +456,26 @@ class _HistorialAcademicoPageState
     }
     return Container(
       padding: const EdgeInsets.all(12),
-      color: Colors.grey[850],
+      color: Colors.grey[100], // Fondo claro
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           Expanded(
             child: _botonGrande("Atrás", Icons.arrow_back, () {
               _navegar(-1);
-            }, habilitado: puedeNavegar),
+            }, colors, habilitado: puedeNavegar),
           ),
           Expanded(
             child: _botonGrande("OK", Icons.check, () {
               _ejecutarAccion();
-            }, habilitado: puedeOK),
+            }, colors, habilitado: puedeOK),
           ),
           Expanded(
             child: _botonGrande("Sig", Icons.arrow_forward, () {
               _navegar(1);
-            }, habilitado: puedeNavegar),
+            }, colors, habilitado: puedeNavegar),
           ),
-          Expanded(child: _botonGrande("Volver", Icons.arrow_upward, _volver)),
+          Expanded(child: _botonGrande("Volver", Icons.arrow_upward, _volver, colors)),
         ],
       ),
     );
@@ -467,21 +484,33 @@ class _HistorialAcademicoPageState
   Widget _botonGrande(
     String texto,
     IconData icono,
-    VoidCallback accion, {
+    VoidCallback accion,
+    ColorScheme colors, {
     bool habilitado = true,
   }) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: habilitado ? Colors.blueGrey : Colors.grey,
+        backgroundColor: habilitado ? colors.primary : Colors.grey[400],
+        foregroundColor: colors.onPrimary, // Texto blanco
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       ),
       onPressed: habilitado ? accion : null,
       child: Column(
         children: [
-          Icon(icono, size: 32, color: Colors.white),
+          Icon(
+            icono, 
+            size: 30, 
+            color: colors.onPrimary.withOpacity(habilitado ? 1.0 : 0.5)
+          ),
           const SizedBox(height: 8),
-          Text(texto, style: const TextStyle(fontSize: 18)),
+          Text(
+            texto, 
+            style: TextStyle(
+              fontSize: 16,
+              color: colors.onPrimary.withOpacity(habilitado ? 1.0 : 0.5)
+            )
+          ),
         ],
       ),
     );

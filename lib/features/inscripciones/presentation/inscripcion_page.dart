@@ -1,4 +1,6 @@
 // lib/features/inscripciones/pages/inscripcion_page.dart
+// (¡¡¡LA PUTA VERSIÓN FINAL CON LÓGICA DE BOTÓN OK ARREGLADA!!!)
+
 import 'package:appuniv/core/tts_service.dart';
 import 'package:appuniv/database/models/academic_models.dart';
 import 'package:appuniv/features/inscripciones/providers/inscripcion_providers.dart';
@@ -7,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:appuniv/core/speech_service.dart';
-
 enum _ModoNav {
   menu,
   listaFacultad,
@@ -63,18 +64,14 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
       _listaFacultades = facultades;
     });
     tts.hablar(
-      "Inscripción de materias. Foco en menú. Opción: Buscar por Facultad. Presione OK para seleccionar.",
-    );
+        "Inscripción de materias. Foco en menú. Opción: Buscar por Facultad. Presione OK para seleccionar.");
   }
 
-  /// Formatea la lecturaTts del modelo para el TTS
   String _formatarLecturaParalelo(ParaleloDetalleCompleto p) {
     final lecturaBase = p.lecturaTts;
     final horariosFormateados = formatarHorariosParaTTS(p.horarios);
     final lecturaFormateada = lecturaBase.replaceFirst(
-      "Horarios: ${p.horarios}.",
-      "Horarios: $horariosFormateados.",
-    );
+        "Horarios: ${p.horarios}.", "Horarios: $horariosFormateados.");
     return limpiarTextoParaTTS(lecturaFormateada);
   }
 
@@ -82,33 +79,29 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
     String lectura = "";
     try {
       switch (_modo) {
-        // 🚨 ======================================================
-        // 🚨 CAMBIO 1: INSTRUCCIÓN AL NAVEGAR (FIX 1)
-        // 🚨 ======================================================
         case _ModoNav.menu:
           if (_idxMenu == 0) {
             lectura = "Buscar por Facultad. Presione OK para seleccionar.";
           } else {
-            lectura =
-                "Buscar por Nombre. Presione OK para activar el micrófono.";
+            lectura = "Buscar por Nombre. Presione OK para activar el micrófono.";
           }
           break;
-        // ======================================================
-
         case _ModoNav.listaFacultad:
-          lectura = _listaFacultades[_idxFacultad].nombre;
+          if (_listaFacultades.isNotEmpty)
+            lectura = _listaFacultades[_idxFacultad].nombre;
           break;
         case _ModoNav.escuchandoBusqueda:
-          // Este mensaje solo se oirá si el usuario
-          // presiona Atrás/Sig *mientras* está escuchando
           lectura = "Micrófono activado. Hable y presione OK para buscar.";
           break;
         case _ModoNav.listaMateria:
-          lectura = _listaMaterias[_idxMateria].nombre;
+          if (_listaMaterias.isNotEmpty)
+            lectura = _listaMaterias[_idxMateria].nombre;
           break;
         case _ModoNav.listaParalelo:
-          final paraleloCompleto = _listaParalelos[_idxParalelo];
-          lectura = _formatarLecturaParalelo(paraleloCompleto);
+          if (_listaParalelos.isNotEmpty) {
+            final paraleloCompleto = _listaParalelos[_idxParalelo];
+            lectura = _formatarLecturaParalelo(paraleloCompleto);
+          }
           break;
       }
     } catch (e) {
@@ -118,7 +111,7 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
     if (_modo != _ModoNav.listaParalelo) {
       tts.hablar(limpiarTextoParaTTS(lectura));
     } else {
-      tts.hablar(lectura); // Ya está limpia
+      tts.hablar(lectura);
     }
   }
 
@@ -126,7 +119,6 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
     bool habilitado = false;
     setState(() {
       _haHabladoBienvenidaLista = true;
-
       switch (_modo) {
         case _ModoNav.menu:
           _idxMenu = (_idxMenu + direccion + 2) % 2;
@@ -134,33 +126,24 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
           break;
         case _ModoNav.listaFacultad:
           if (_listaFacultades.isNotEmpty) {
-            _idxFacultad =
-                (_idxFacultad + direccion + _listaFacultades.length) %
-                _listaFacultades.length;
+            _idxFacultad = (_idxFacultad + direccion + _listaFacultades.length) % _listaFacultades.length;
             habilitado = true;
           }
           break;
         case _ModoNav.listaMateria:
           if (_listaMaterias.isNotEmpty) {
-            _idxMateria =
-                (_idxMateria + direccion + _listaMaterias.length) %
-                _listaMaterias.length;
+            _idxMateria = (_idxMateria + direccion + _listaMaterias.length) % _listaMaterias.length;
             habilitado = true;
           }
           break;
         case _ModoNav.listaParalelo:
           if (_listaParalelos.isNotEmpty) {
-            _idxParalelo =
-                (_idxParalelo + direccion + _listaParalelos.length) %
-                _listaParalelos.length;
+            _idxParalelo = (_idxParalelo + direccion + _listaParalelos.length) % _listaParalelos.length;
             habilitado = true;
           }
           break;
         case _ModoNav.escuchandoBusqueda:
-          // Esta es la instrucción si intenta navegar mientras escucha
-          tts.hablar(
-            "Modo de escucha. Hable y presione OK para buscar, o Volver para cancelar.",
-          );
+          tts.hablar("Modo de escucha. Hable y presione OK para buscar, o Volver para cancelar.");
           break;
       }
     });
@@ -177,14 +160,12 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
     switch (_modo) {
       case _ModoNav.menu:
         if (_idxMenu == 0) {
-          // "Buscar por Facultad"
           setState(() {
             _modo = _ModoNav.listaFacultad;
             _idxFacultad = 0;
           });
           tts.hablar("Cargando facultades...");
         } else {
-          // "Buscar por Nombre"
           if (!_speechInicializado) {
             tts.hablar("Error. El servicio de voz no pudo iniciarse.");
             return;
@@ -193,17 +174,11 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
           setState(() {
             _modo = _ModoNav.escuchandoBusqueda;
           });
-
-          // 🚨 ======================================================
-          // 🚨 CAMBIO 2: SILENCIO AL ACTIVAR EL MICRÓFONO (FIX 2)
-          // 🚨 ======================================================
-          // NO HABLAR. Solo activar el micrófono.
-          // _ttsCampoActual(); // <- ESTA LÍNEA SE ELIMINÓ
-          // ======================================================
         }
         break;
 
       case _ModoNav.listaFacultad:
+        if (_listaFacultades.isEmpty) return;
         final facultad = _listaFacultades[_idxFacultad];
         setState(() {
           _modo = _ModoNav.listaMateria;
@@ -212,9 +187,7 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
           _listaMaterias = [];
           _idxMateria = 0;
         });
-        tts.hablar(
-          "Facultad ${facultad.nombre} seleccionada. Cargando materias...",
-        );
+        tts.hablar("Facultad ${facultad.nombre} seleccionada. Cargando materias...");
         break;
 
       case _ModoNav.escuchandoBusqueda:
@@ -222,12 +195,9 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
         if (queryVoz.trim().isEmpty) {
           tts.hablar("No se detectó ninguna voz. Intente de nuevo.");
           await speech.startListening();
-          // _ttsCampoActual(); // No es necesario, la UI ya dice "Escuchando"
           return;
         }
-
         final queryNormalizada = normalizarQueryBusqueda(queryVoz);
-
         setState(() {
           _modo = _ModoNav.listaMateria;
           _idFacultadSeleccionada = null;
@@ -235,12 +205,11 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
           _listaMaterias = [];
           _idxMateria = 0;
         });
-        tts.hablar(
-          "Buscando materias para: ${limpiarTextoParaTTS(queryVoz)}. Cargando...",
-        );
+        tts.hablar("Buscando materias para: ${limpiarTextoParaTTS(queryVoz)}. Cargando...");
         break;
 
       case _ModoNav.listaMateria:
+        if (_listaMaterias.isEmpty) return;
         final materia = _listaMaterias[_idxMateria];
         setState(() {
           _modo = _ModoNav.listaParalelo;
@@ -248,22 +217,20 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
           _listaParalelos = [];
           _idxParalelo = 0;
         });
-        tts.hablar(
-          "Materia ${limpiarTextoParaTTS(materia.nombre)} seleccionada. Cargando paralelos...",
-        );
+        tts.hablar("Materia ${limpiarTextoParaTTS(materia.nombre)} seleccionada. Cargando paralelos...");
         break;
 
       case _ModoNav.listaParalelo:
+        if (_listaParalelos.isEmpty) return;
         _haHabladoBienvenidaLista = true;
         final paralelo = _listaParalelos[_idxParalelo];
-
+        
         tts.hablar("Procesando. Espere por favor...");
         try {
-          final resultado = await ref
-              .read(inscripcionServiceProvider.notifier)
-              .inscribirOsolicitar(paralelo);
-
+          final resultado = await ref.read(inscripcionServiceProvider.notifier).inscribirOsolicitar(paralelo);
           tts.hablar(limpiarTextoParaTTS(resultado));
+          
+          ref.invalidate(paralelosMateriaProvider(paralelo.idMateria));
         } catch (e) {
           tts.hablar("Error inesperado: ${e.toString()}");
         }
@@ -308,18 +275,19 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      // Sin color forzado, usa el tema (Blanco)
       appBar: AppBar(
         title: const Text("Inscripción de Materias"),
-        backgroundColor: Colors.grey[900],
         automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
-          _buildSelectorUI(),
-          Expanded(child: _buildContenidoDinamico()),
-          _buildBotonesAccesibles(),
+          _buildSelectorUI(colorScheme),
+          Expanded(child: _buildContenidoDinamico(colorScheme)),
+          _buildBotonesAccesibles(colorScheme),
         ],
       ),
     );
@@ -334,27 +302,25 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
     }
   }
 
-  Widget _buildContenidoDinamico() {
+  Widget _buildContenidoDinamico(ColorScheme colors) {
     if (_modo == _ModoNav.listaFacultad) {
       final asyncFacultades = ref.watch(facultadesProvider);
       return asyncFacultades.when(
         data: (facultades) {
           _listaFacultades = facultades;
-          if (facultades.isEmpty)
-            return _buildError("No se encontraron facultades.");
+          if (facultades.isEmpty) {
+            tts.hablar("No se encontraron facultades.");
+            return _buildError("No se encontraron facultades.", colors);
+          }
           _anunciarPrimeraVez(facultades[_idxFacultad].nombre);
           return _buildListaUI(
             itemCount: facultades.length,
-            builder:
-                (index) => _buildItemGenerico(
-                  facultades[index].nombre,
-                  Icons.school,
-                  index == _idxFacultad,
-                ),
+            builder: (index) => _buildItemGenerico(
+                facultades[index].nombre, Icons.school, index == _idxFacultad, colors),
           );
         },
-        loading: () => _buildLoader("Cargando facultades..."),
-        error: (e, s) => _buildError(e.toString()),
+        loading: () => _buildLoader("Cargando facultades...", colors),
+        error: (e, s) => _buildError(e.toString(), colors),
       );
     }
 
@@ -363,100 +329,76 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.mic, color: Colors.red.shade400, size: 100),
+            Icon(Icons.mic, color: colors.error, size: 100), // Rojo
             const SizedBox(height: 20),
-            const Text(
-              "Escuchando...",
-              style: TextStyle(color: Colors.white, fontSize: 24),
-            ),
-            const Text(
-              "Hable y presione OK para buscar",
-              style: TextStyle(color: Colors.white70, fontSize: 18),
-            ),
+            Text("Escuchando...",
+                style: TextStyle(color: colors.onSurface, fontSize: 24)),
+            Text("Hable y presione OK para buscar",
+                style: TextStyle(color: Colors.grey[700], fontSize: 18)),
           ],
         ),
       );
     }
 
     if (_modo == _ModoNav.listaMateria && _idFacultadSeleccionada != null) {
-      final asyncMaterias = ref.watch(
-        materiasPorFacultadProvider(_idFacultadSeleccionada!),
-      );
+      final asyncMaterias = ref.watch(materiasPorFacultadProvider(_idFacultadSeleccionada!));
       return asyncMaterias.when(
         data: (materias) {
           _listaMaterias = materias;
           if (materias.isEmpty) {
-            return _buildError(
-              "No se encontraron materias para esta facultad.",
-            );
+            tts.hablar("No se encontraron materias para esta facultad.");
+            return _buildError("No se encontraron materias para esta facultad.", colors);
           }
           _anunciarPrimeraVez(materias[_idxMateria].nombre);
           return _buildListaUI(
             itemCount: materias.length,
-            builder:
-                (index) => _buildItemGenerico(
-                  materias[index].nombre,
-                  Icons.book,
-                  index == _idxMateria,
-                ),
+            builder: (index) => _buildItemGenerico(
+                materias[index].nombre, Icons.book, index == _idxMateria, colors),
           );
         },
-        loading: () => _buildLoader("Cargando materias..."),
-        error: (e, s) => _buildError(e.toString()),
+        loading: () => _buildLoader("Cargando materias...", colors),
+        error: (e, s) => _buildError(e.toString(), colors),
       );
     }
 
     if (_modo == _ModoNav.listaMateria && _queryBusqueda.isNotEmpty) {
-      final asyncMaterias = ref.watch(
-        materiasPorBusquedaProvider(_queryBusqueda),
-      );
+      final asyncMaterias = ref.watch(materiasPorBusquedaProvider(_queryBusqueda));
       return asyncMaterias.when(
         data: (materias) {
           _listaMaterias = materias;
           if (materias.isEmpty) {
-            return _buildError(
-              "No se encontraron materias con: '${limpiarTextoParaTTS(_queryBusqueda)}'.",
-            );
+            tts.hablar("No se encontraron materias con esa búsqueda.");
+            return _buildError("No se encontraron materias con: '${limpiarTextoParaTTS(_queryBusqueda)}'.", colors);
           }
           _anunciarPrimeraVez(materias[_idxMateria].nombre);
           return _buildListaUI(
             itemCount: materias.length,
-            builder:
-                (index) => _buildItemGenerico(
-                  materias[index].nombre,
-                  Icons.search,
-                  index == _idxMateria,
-                ),
+            builder: (index) => _buildItemGenerico(
+                materias[index].nombre, Icons.search, index == _idxMateria, colors),
           );
         },
-        loading: () => _buildLoader("Buscando materias..."),
-        error: (e, s) => _buildError(e.toString()),
+        loading: () => _buildLoader("Buscando materias...", colors),
+        error: (e, s) => _buildError(e.toString(), colors),
       );
     }
 
     if (_modo == _ModoNav.listaParalelo && _idMateriaSeleccionada != null) {
-      final asyncParalelos = ref.watch(
-        paralelosMateriaProvider(_idMateriaSeleccionada!),
-      );
+      final asyncParalelos = ref.watch(paralelosMateriaProvider(_idMateriaSeleccionada!));
       return asyncParalelos.when(
         data: (paralelos) {
           _listaParalelos = paralelos;
           if (paralelos.isEmpty) {
-            return _buildError(
-              "No se encontraron paralelos para esta materia.",
-            );
+            tts.hablar("No se encontraron paralelos disponibles.");
+            return _buildError("No se encontraron paralelos para esta materia.", colors);
           }
           _anunciarPrimeraVez(_listaParalelos[_idxParalelo].lecturaTts);
-
           return _buildListaUI(
             itemCount: paralelos.length,
-            builder:
-                (index) =>
-                    _buildParaleloItem(paralelos[index], index == _idxParalelo),
+            builder: (index) => _buildParaleloItem(paralelos[index], index == _idxParalelo, colors),
           );
         },
-        loading: () => _buildLoader("Cargando paralelos..."),
-        error: (e, s) => _buildError(e.toString()),
+        loading: () => _buildLoader("Cargando paralelos...", colors),
+        error: (e, s) => _buildError(e.toString(), colors),
       );
     }
 
@@ -465,137 +407,124 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
 
   // --- Widgets Genéricos de UI ---
 
-  Widget _buildSelectorUI() {
+  Widget _buildSelectorUI(ColorScheme colors) {
     if (_modo != _ModoNav.menu) {
       return const SizedBox.shrink();
     }
     return Column(
       children: [
-        GestureDetector(
-          onTap: () {
-            setState(() => _idxMenu = 0);
-            _ttsCampoActual();
-          },
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color:
-                  _idxMenu == 0 ? Colors.blue.shade700 : Colors.blue.shade900,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.school, size: 30, color: Colors.white),
-                SizedBox(width: 20),
-                Text(
-                  "Buscar por Facultad",
-                  style: TextStyle(color: Colors.white, fontSize: 24),
-                ),
-              ],
-            ),
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            setState(() => _idxMenu = 1);
-            _ttsCampoActual();
-          },
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color:
-                  _idxMenu == 1 ? Colors.green.shade700 : Colors.green.shade900,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.mic, size: 30, color: Colors.white),
-                SizedBox(width: 20),
-                Text(
-                  "Buscar por Nombre",
-                  style: TextStyle(color: Colors.white, fontSize: 24),
-                ),
-              ],
-            ),
-          ),
-        ),
+        _buildMenuItem("Buscar por Facultad", Icons.school, _idxMenu == 0, colors, 0),
+        _buildMenuItem("Buscar por Nombre", Icons.mic, _idxMenu == 1, colors, 1),
       ],
     );
   }
 
-  Widget _buildListaUI({
-    required int itemCount,
-    required Widget Function(int) builder,
-  }) {
+  Widget _buildMenuItem(String texto, IconData icono, bool seleccionado, ColorScheme colors, int index) {
+    return GestureDetector(
+      onTap: () {
+        setState(() => _idxMenu = index);
+        _ttsCampoActual();
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          // Azul claro si seleccionado, Gris claro si no
+          color: seleccionado ? colors.primary.withOpacity(0.1) : Colors.grey[200],
+          borderRadius: BorderRadius.circular(16),
+          // Borde azul grueso si seleccionado
+          border: seleccionado 
+              ? Border.all(color: colors.primary, width: 3) 
+              : Border.all(color: Colors.grey[400]!),
+        ),
+        child: Row(
+          children: [
+            Icon(icono, size: 30, color: seleccionado ? colors.primary : Colors.grey[800]),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Text(
+                texto, 
+                style: TextStyle(
+                  color: colors.onSurface, // Negro
+                  fontSize: 24,
+                  fontWeight: seleccionado ? FontWeight.bold : FontWeight.normal
+                )
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildListaUI({required int itemCount, required Widget Function(int) builder}) {
     return ListView.builder(
       itemCount: itemCount,
       itemBuilder: (context, index) => builder(index),
     );
   }
 
-  Widget _buildItemGenerico(String texto, IconData icono, bool seleccionado) {
+  Widget _buildItemGenerico(String texto, IconData icono, bool seleccionado, ColorScheme colors) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 30),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: seleccionado ? Colors.indigo.shade700 : Colors.indigo.shade900,
+        color: seleccionado ? colors.primary.withOpacity(0.1) : Colors.grey[200],
         borderRadius: BorderRadius.circular(16),
+        border: seleccionado ? Border.all(color: colors.primary, width: 2) : null,
       ),
       child: Row(
         children: [
-          Icon(icono, size: 24, color: Colors.white),
+          Icon(icono, size: 24, color: seleccionado ? colors.primary : Colors.grey[800]),
           const SizedBox(width: 15),
           Expanded(
-            child: Text(
-              limpiarTextoParaTTS(texto),
-              style: const TextStyle(color: Colors.white, fontSize: 22),
-            ),
+            child: Text(limpiarTextoParaTTS(texto),
+                style: TextStyle(color: colors.onSurface, fontSize: 22)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildParaleloItem(
-    ParaleloDetalleCompleto paraleloInfo,
-    bool seleccionado,
-  ) {
+  Widget _buildParaleloItem(ParaleloDetalleCompleto paraleloInfo, bool seleccionado, ColorScheme colors) {
     final paralelo = paraleloInfo.paralelo;
-    Color colorEstado;
+    Color colorBorde;
+    Color colorFondo;
+    
     switch (paralelo.estadoEstudiante) {
       case EstadoInscripcionParalelo.inscrito:
-        colorEstado = Colors.green;
+        colorBorde = Colors.green;
+        colorFondo = Colors.green[50]!;
         break;
       case EstadoInscripcionParalelo.solicitado:
-        colorEstado = Colors.yellow;
+        colorBorde = Colors.yellow[800]!; // Amarillo más oscuro para que se vea en blanco
+        colorFondo = Colors.orange[50]!;
         break;
       case EstadoInscripcionParalelo.ninguno:
-        colorEstado = Colors.grey;
+        colorBorde = Colors.grey;
+        colorFondo = Colors.white;
         break;
+      default:
+        colorBorde = Colors.grey;
+        colorFondo = Colors.white;
     }
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 30),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: seleccionado ? Colors.teal.shade700 : Colors.teal.shade900,
+        color: seleccionado ? colors.primary.withOpacity(0.05) : colorFondo,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: seleccionado ? Colors.white : Colors.transparent,
-          width: 2,
+          color: seleccionado ? colors.primary : colorBorde,
+          width: seleccionado ? 3 : 1,
         ),
       ),
       child: Row(
         children: [
           Container(
-            width: 12,
-            height: 12,
-            decoration: BoxDecoration(
-              color: colorEstado,
-              shape: BoxShape.circle,
-            ),
+            width: 12, height: 12,
+            decoration: BoxDecoration(color: colorBorde, shape: BoxShape.circle),
           ),
           const SizedBox(width: 15),
           Expanded(
@@ -604,59 +533,52 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
               children: [
                 Text(
                   "Paralelo ${paralelo.nombreParalelo} - ${paralelo.docenteNombre} ${paralelo.docenteApellido}",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(color: colors.onSurface, fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   "Horarios: ${formatarHorariosParaTTS(paraleloInfo.horarios)}",
-                  style: const TextStyle(color: Colors.white70, fontSize: 16),
+                  style: TextStyle(color: Colors.grey[800], fontSize: 16),
                 ),
                 Text(
                   "Aula: ${paralelo.aula} - Créditos: ${paralelo.creditos}",
-                  style: const TextStyle(color: Colors.white70, fontSize: 16),
+                  style: TextStyle(color: Colors.grey[800], fontSize: 16),
                 ),
               ],
             ),
           ),
-          if (seleccionado) const Icon(Icons.volume_up, color: Colors.white70),
+          if (seleccionado) Icon(Icons.volume_up, color: colors.primary),
         ],
       ),
     );
   }
 
-  Widget _buildLoader(String texto) {
+  Widget _buildLoader(String texto, ColorScheme colors) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const CircularProgressIndicator(),
           const SizedBox(height: 16),
-          Text(
-            texto,
-            style: const TextStyle(color: Colors.white, fontSize: 18),
-          ),
+          Text(texto, style: TextStyle(color: colors.onSurface, fontSize: 18)),
         ],
       ),
     );
   }
 
-  Widget _buildError(String error) {
+  Widget _buildError(String error, ColorScheme colors) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Text(
           limpiarTextoParaTTS(error),
-          style: const TextStyle(color: Colors.yellow, fontSize: 18),
+          style: TextStyle(color: colors.error, fontSize: 18),
           textAlign: TextAlign.center,
         ),
       ),
     );
   }
 
-  Widget _buildBotonesAccesibles() {
+  Widget _buildBotonesAccesibles(ColorScheme colors) {
     bool navHabilitado = true;
     bool okHabilitado = true;
 
@@ -679,58 +601,46 @@ class _InscripcionPageState extends ConsumerState<InscripcionPage> {
 
     return Container(
       padding: const EdgeInsets.all(12),
-      color: Colors.grey[850],
+      color: Colors.grey[100], // Fondo claro
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           Expanded(
-            child: _botonGrande(
-              "Atrás",
-              Icons.arrow_back,
-              () => _navegar(-1),
-              habilitado: navHabilitado,
-            ),
+            child: _botonGrande("Atrás", Icons.arrow_back, () => _navegar(-1),
+                colors, habilitado: navHabilitado),
           ),
           Expanded(
-            child: _botonGrande(
-              "OK",
-              Icons.check,
-              _ejecutarAccion,
-              habilitado: okHabilitado,
-            ),
+            child: _botonGrande("OK", Icons.check, _ejecutarAccion,
+                colors, habilitado: okHabilitado),
           ),
           Expanded(
-            child: _botonGrande(
-              "Sig",
-              Icons.arrow_forward,
-              () => _navegar(1),
-              habilitado: navHabilitado,
-            ),
+            child: _botonGrande("Sig", Icons.arrow_forward, () => _navegar(1),
+                colors, habilitado: navHabilitado),
           ),
-          Expanded(child: _botonGrande("Volver", Icons.arrow_upward, _volver)),
+          Expanded(
+            child: _botonGrande("Volver", Icons.arrow_upward, _volver, colors),
+          ),
         ],
       ),
     );
   }
 
   Widget _botonGrande(
-    String texto,
-    IconData icono,
-    VoidCallback accion, {
-    bool habilitado = true,
-  }) {
+      String texto, IconData icono, VoidCallback accion, ColorScheme colors,
+      {bool habilitado = true}) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: habilitado ? Colors.blueGrey : Colors.grey,
+        backgroundColor: habilitado ? colors.primary : Colors.grey[400],
+        foregroundColor: colors.onPrimary, // Texto blanco
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       ),
       onPressed: habilitado ? accion : null,
       child: Column(
         children: [
-          Icon(icono, size: 32, color: Colors.white),
-          const SizedBox(height: 8),
-          Text(texto, style: const TextStyle(fontSize: 18)),
+          Icon(icono, size: 30, color: colors.onPrimary.withOpacity(habilitado ? 1.0 : 0.5)),
+          const SizedBox(height: 4),
+          Text(texto, style: TextStyle(fontSize: 14, color: colors.onPrimary.withOpacity(habilitado ? 1.0 : 0.5))),
         ],
       ),
     );

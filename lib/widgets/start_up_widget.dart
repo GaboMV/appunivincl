@@ -1,65 +1,78 @@
-import 'package:appuniv/database/database_providers.dart';
-import 'package:appuniv/database/repositories/repo_provider.dart';
-// 🚨 CORRECCIÓN DE IMPORTACIÓN 🚨
+// lib/widgets/start_up_widget.dart
+// (¡¡¡LA PUTA VERSIÓN CORREGIDA QUE NO FALLA EL PARSEO!!!)
 
-import 'package:appuniv/features/login/presentation/login.dart';
+import 'dart:convert';
+import 'package:appuniv/features/home/presentation/menu_principal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sqflite/sqflite.dart'; // Necesario para el tipo Database
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+// ¡¡¡AJUSTA ESTOS PUTOS IMPORTS!!!
+import 'package:appuniv/features/login/presentation/login.dart'; 
+
+import 'package:appuniv/features/session/providers/session_provider.dart';
+import 'package:appuniv/services/api_service.dart'; // Necesario para logout si hay error
+
+// ¡Provider auxiliar para manejar el Future/Loading!
+final _sessionInitializationProvider = FutureProvider<bool>((ref) async {
+    final sessionNotifier = ref.read(sessionNotifierProvider.notifier);
+    // Llama a la función que lee el token y los datos del estudiante
+    return await sessionNotifier.initializeSession();
+});
+
+/// Este es el puto "Bouncer".
+/// Inicializa la sesión y decide a dónde navegar.
 class AppStartUpWidget extends ConsumerWidget {
-  const AppStartUpWidget({super.key});
+  // ¡¡¡ARREGLO #1: NO LLEVA 'const'!!!
+  AppStartUpWidget({super.key}); 
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 💡 Paso CRÍTICO: Observamos el FutureProvider de la base de datos.
-    // Esto obliga a la BD a inicializarse de forma ansiosa.
-    final databaseState = ref.watch(databaseInstanceProvider);
+    // Observamos el futuro de la inicialización
+    final initFuture = ref.watch(_sessionInitializationProvider);
 
-    // Usamos .when para manejar los tres posibles estados del Future
-    return databaseState.when(
-      // ⏳ Estado de Carga (La BD se está abriendo/creando)
-      loading:
-          () => const Scaffold(
-            backgroundColor: Colors.black, // Color oscuro para coherencia
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: Colors.greenAccent),
-                  SizedBox(height: 16),
-                  Text(
-                    'Inicializando sistema académico...',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ],
+    // ¡¡¡ARREGLO #2: EL CÓDIGO DEL '.when' ES SINTÁCTICAMENTE SEGURO!!!
+    return initFuture.when(
+      
+      // --- loading: ---
+      loading: () => const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(
+            semanticsLabel: 'Verificando sesión...',
+          ),
+        ),
+      ),
+      
+      // --- error: ---
+      error: (err, stack) {
+        // En caso de error de lectura de disco (JSON corrupto), limpiamos la sesión.
+        ref.read(apiServiceProvider).logout();
+        return Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Text(
+                "ERROR FATAL DE INICIO: $err. Sesión limpiada. Por favor, reinicia la app.", 
+                style: const TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
               ),
             ),
           ),
-
-      // ❌ Estado de Error (Error al crear/abrir la BD)
-      error:
-          (err, stack) => Scaffold(
-            backgroundColor: Colors.black,
-            body: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32.0),
-                child: Text(
-                  'Error fatal al cargar la base de datos. Por favor, reinicia la aplicación. Detalles: ${err.toString()}',
-                  style: TextStyle(color: Colors.red, fontSize: 16),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ),
-
-      // ✅ Estado de Datos (La BD está lista)
-      data: (Database db) {
-        final repo = ref.read(estudianteRepositoryProvider);
-        print(repo.debugPrintAllTables());
-        // La instancia de Database está disponible. Podemos mostrar el Login.
-        // Usamos el nombre correcto de la clase: LoginPageAccesible
-        return const LoginPageAccesible();
+        );
+      },
+      
+      // --- data: --- (¡Este es el que fallaba, carajo!)
+      data: (isRestored) {
+        // Ahora, solo miramos el estado actual de Riverpod
+        final sessionState = ref.watch(sessionNotifierProvider);
+        
+        if (sessionState.isLoggedIn) {
+          // ¡Riverpod tiene datos! ¡A la casa!
+          return const MenuPrincipalAccesible(); 
+        } else {
+          // No se pudo restaurar o no había token. ¡Al login!
+          return const LoginPageAccesible(); 
+        }
       },
     );
   }

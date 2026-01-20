@@ -7,11 +7,9 @@ part of 'historial_providers.dart';
 // **************************************************************************
 
 String _$historialSemestresHash() =>
-    r'41f3658ab56ee431020944e2016d514f84f6c809';
+    r'8a2afa355324cb0b4e45a749969d8e2d160c4ac5';
 
-/// Provider que obtiene los semestres donde el estudiante tuvo inscripciones
-///
-/// Copied from [historialSemestres].
+/// See also [historialSemestres].
 @ProviderFor(historialSemestres)
 final historialSemestresProvider = FutureProvider<List<Semestre>>.internal(
   historialSemestres,
@@ -27,7 +25,7 @@ final historialSemestresProvider = FutureProvider<List<Semestre>>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef HistorialSemestresRef = FutureProviderRef<List<Semestre>>;
-String _$historialMateriasHash() => r'c6134637923466f0eee54e67e741faa844dd0fcf';
+String _$historialMateriasHash() => r'da48ccbf9dfad470f25d5da227d0eee25575ad05';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -50,29 +48,17 @@ class _SystemHash {
   }
 }
 
-/// Provider que obtiene las materias de UN semestre específico
-/// Pasa el idSemestre como argumento
-///
-/// Copied from [historialMaterias].
+/// See also [historialMaterias].
 @ProviderFor(historialMaterias)
 const historialMateriasProvider = HistorialMateriasFamily();
 
-/// Provider que obtiene las materias de UN semestre específico
-/// Pasa el idSemestre como argumento
-///
-/// Copied from [historialMaterias].
+/// See also [historialMaterias].
 class HistorialMateriasFamily
     extends Family<AsyncValue<List<HistorialMateria>>> {
-  /// Provider que obtiene las materias de UN semestre específico
-  /// Pasa el idSemestre como argumento
-  ///
-  /// Copied from [historialMaterias].
+  /// See also [historialMaterias].
   const HistorialMateriasFamily();
 
-  /// Provider que obtiene las materias de UN semestre específico
-  /// Pasa el idSemestre como argumento
-  ///
-  /// Copied from [historialMaterias].
+  /// See also [historialMaterias].
   HistorialMateriasProvider call(int idSemestre) {
     return HistorialMateriasProvider(idSemestre);
   }
@@ -99,15 +85,9 @@ class HistorialMateriasFamily
   String? get name => r'historialMateriasProvider';
 }
 
-/// Provider que obtiene las materias de UN semestre específico
-/// Pasa el idSemestre como argumento
-///
-/// Copied from [historialMaterias].
+/// See also [historialMaterias].
 class HistorialMateriasProvider extends FutureProvider<List<HistorialMateria>> {
-  /// Provider que obtiene las materias de UN semestre específico
-  /// Pasa el idSemestre como argumento
-  ///
-  /// Copied from [historialMaterias].
+  /// See also [historialMaterias].
   HistorialMateriasProvider(int idSemestre)
     : this._internal(
         (ref) => historialMaterias(ref as HistorialMateriasRef, idSemestre),

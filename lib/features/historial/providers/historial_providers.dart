@@ -1,45 +1,66 @@
 // lib/features/historial/providers/historial_providers.dart
+// (¡¡¡LA PUTA VERSIÓN NUEVA CON API Y LOGS!!!)
 
-import 'package:appuniv/database/models/academic_models.dart';
-// 🚨 CORREGÍ ESTA RUTA, DEBE APUNTAR AL .g.dart
-
-import 'package:appuniv/database/repositories/repo_provider.dart';
+import 'package:appuniv/services/api_service.dart';
+import 'package:appuniv/database/models/academic_models.dart'; // (¡Revisa esta ruta!)
 import 'package:appuniv/features/session/providers/session_provider.dart';
+import 'package:appuniv/services/socket_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-// 🚨 ESTA ES LA LÍNEA QUE FALTABA 🚨
-// Es la que conecta este archivo con el archivo generado .g.dart
 part 'historial_providers.g.dart';
 
-/// Provider que obtiene los semestres donde el estudiante tuvo inscripciones
 @Riverpod(keepAlive: true)
-Future<List<Semestre>> historialSemestres(HistorialSemestresRef ref) {
-  // ... (el resto de tu código está perfecto)
+Future<List<Semestre>> historialSemestres(HistorialSemestresRef ref) async {
+  ref.watch(socketServiceProvider);
+  print("HISTORIAL_PROVIDER: Pidiendo semestres...");
   final estudiante = ref.watch(sessionNotifierProvider).estudiante;
   if (estudiante == null) {
-    throw Exception("Usuario no autenticado.");
+    print("HISTORIAL_PROVIDER (ERROR): ¡Puto estudiante nulo!");
+    throw Exception("Usuario no autenticado, carajo.");
   }
 
-  final registroRepo = ref.watch(registroRepositoryProvider);
-  return registroRepo.getSemestresInscritos(estudiante.id_estudiante);
+  final api = ref.watch(apiServiceProvider);
+  
+  try {
+    final List<dynamic> jsonList = await api.getSemestresInscritos(estudiante.id_estudiante);
+    print("HISTORIAL_PROVIDER (Semestres): ¡JSON recibido! Parseando ${jsonList.length} semestres.");
+    
+    // ¡Aquí parseamos, carajo!
+    return jsonList.map((json) => Semestre.fromMap(json as Map<String, dynamic>)).toList();
+  
+  } catch (e) {
+    print("HISTORIAL_PROVIDER (Semestres ERROR): ¡La cagó el parseo o la API! $e");
+    rethrow;
+  }
 }
 
-/// Provider que obtiene las materias de UN semestre específico
-/// Pasa el idSemestre como argumento
 @Riverpod(keepAlive: true)
 Future<List<HistorialMateria>> historialMaterias(
   HistorialMateriasRef ref,
   int idSemestre,
-) {
-  // ... (el resto de tu código está perfecto)
+) async {
+  ref.watch(socketServiceProvider);
+  print("HISTORIAL_PROVIDER: Pidiendo materias para semestre $idSemestre...");
   final estudiante = ref.watch(sessionNotifierProvider).estudiante;
   if (estudiante == null) {
-    throw Exception("Usuario no autenticado.");
+    print("HISTORIAL_PROVIDER (ERROR): ¡Puto estudiante nulo!");
+    throw Exception("Usuario no autenticado, carajo.");
   }
 
-  final registroRepo = ref.watch(registroRepositoryProvider);
-  return registroRepo.getHistorialPorSemestre(
-    estudiante.id_estudiante,
-    idSemestre,
-  );
+  final api = ref.watch(apiServiceProvider);
+
+  try {
+    final List<dynamic> jsonList = await api.getHistorialPorSemestre(
+      estudiante.id_estudiante,
+      idSemestre,
+    );
+    print("HISTORIAL_PROVIDER (Materias): ¡JSON recibido! Parseando ${jsonList.length} materias.");
+
+    // ¡Aquí parseamos, carajo!
+    return jsonList.map((json) => HistorialMateria.fromMap(json as Map<String, dynamic>)).toList();
+  
+  } catch (e) {
+    print("HISTORIAL_PROVIDER (Materias ERROR): ¡La cagó el parseo o la API! $e");
+    rethrow;
+  }
 }
